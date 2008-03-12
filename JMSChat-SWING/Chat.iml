@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module relativePaths="true" classpath="eclipse" type="JAVA_MODULE" version="4">
+  <component name="BuildJarSettings">
+    <containerInfo>
+      <containerElement type="module" name="Chat">
+        <attribute name="method" value="5" />
+        <attribute name="URI" value="/Chat.jar" />
+      </containerElement>
+      <containerElement type="library" level="module">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/javaee.jar" />
+        <url>jar://$APPLICATION_HOME_DIR$/lib/javaee.jar!/</url>
+      </containerElement>
+      <containerElement type="library" name="Flex" level="project">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/" />
+      </containerElement>
+      <containerElement type="library" name="JBossMQ" level="project">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/" />
+      </containerElement>
+    </containerInfo>
+    <setting name="jarUrl" value="file://$MODULE_DIR$/Chat.jar" />
+    <setting name="buildJar" value="true" />
+    <setting name="mainClass" value="flex.samples.jms.Chat" />
+  </component>
+  <component name="FacetManager">
+    <facet type="javaeeApplication" name="javaEEApplication">
+      <configuration>
+        <descriptors>
+          <deploymentDescriptor name="application.xml" url="file://$MODULE_DIR$/META-INF/application.xml" optional="false" version="5" />
+        </descriptors>
+        <building>
+          <setting name="EXPLODED_URL" value="file://$MODULE_DIR$/out/exploded/ChatEar" />
+          <setting name="EXPLODED_ENABLED" value="true" />
+          <setting name="JAR_URL" value="file://" />
+          <setting name="JAR_ENABLED" value="false" />
+          <setting name="BUILD_MODULE_ON_FRAME_DEACTIVATION" value="false" />
+          <setting name="BUILD_EXTERNAL_DEPENDENCIES" value="false" />
+          <setting name="EXCLUDE_EXPLODED_DIRECTORY" value="true" />
+        </building>
+      </configuration>
+    </facet>
+  </component>
+</module>
+
