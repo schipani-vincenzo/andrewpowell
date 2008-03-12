@@ -1,0 +1,41 @@
+@charset "UTF-8";
+/* CSS Document */
+body
+{
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+ 	font-size: .75em;
+   	overflow: hidden;
+}
+img
+{
+border:none;
+}
+
+a
+{
+text-decoration:none;
+}
+a.hover
+{
+font-weight:bold;
+color:#009900
+}
+.decrease
+{
+color:#FF0000;
+}
+
+.increase
+{
+color:#009933;
+}
+.byline
+{
+font-size: .6em;
+}
+#ads
+{
+	width:100%;	
+	
+}
+
