@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Stock Watcher</title>
+<script type="text/javascript" src="AIRAliases.js"></script>
+  <script type="text/javascript">
+		    var Exposed = {};
+			var db 	  	= null;
+	
+	
+			
+		    Exposed.trace	    = function(str) { air.trace(str); }
+			Exposed.saveSymbol  = saveSymbol;
+			Exposed.loadSymbols = loadSymbols;
+			Exposed.deleteSymbol= deleteSymbol;
+	
+			function doLoad()
+			{
+				getDBConn();
+				document.getElementById('UI').contentWindow.parentSandboxBridge = Exposed;
+					
+			}
+			
+			function getDBConn()
+			{
+				if(db == null)
+				{
+					var file = air.File.applicationResourceDirectory.resolvePath("stockWatcher.db");
+					db = new air.SQLConnection(true);
+					db.open(file,true);
+					air.trace("DB Conn Open");
+					
+					var createStmt = new air.SQLStatement();
+					createStmt.sqlConnection = getDBConn();
+					
+					var sql = "CREATE TABLE IF NOT EXISTS stocks (symbol TEXT PRIMARY KEY)";
+					createStmt.text = sql;
+					
+					createStmt.addEventListener(air.SQLEvent.RESULT, onTableCreateComplete);
+					createStmt.addEventListener(air.SQLErrorEvent.ERROR, onDBError);
+					
+					createStmt.execute();
+				}
+				return db;
+			}
+			
+			function onDBOpen( event ) {
+				var createStmt = new air.SQLStatement();
+				createStmt.sqlConnection = getDBConn();
+				
+				var sql = "CREATE TABLE IF NOT EXISTS stocks (symbol TEXT PRIMARY KEY)";
+				createStmt.text = sql;
+				
+				createStmt.addEventListener(air.SQLEvent.RESULT, onTableCreateComplete);
+				createStmt.addEventListener(air.SQLErrorEvent.ERROR, onDBError);
+				
+				createStmt.execute();
+			}
+			
+			function onTableCreateComplete(event)
+			{
+				air.trace("Table Created");
+			}
+			
+			
+			function onDBError( event ) {
+				air.trace("Error Code: ", event.error.code);
+				air.trace("Details: ",event.error.message);
+			}
+			
+			function doUnload()
+			{
+				db.close();
+			}
+			
+			function saveSymbol( symbol ) 
+			{
+				var insertStmt = new air.SQLStatement();
+				insertStmt.sqlConnection = getDBConn();
+				var sql = "";
+				sql = sql + "INSERT INTO stocks(symbol) VALUES('" + symbol + "')";
+				insertStmt.text = sql;
+		
+				insertStmt.execute();
+			}
+			
+			function onSymbolInsert( event )
+			{
+				var stmt = event.target;
+				
+				stmt.removeEventListener(air.SQLEvent.RESULT,onSymbolInsert);
+				stmt.removeEventListener(air.SQLErrorEvent.ERROR, onDBError);
+				
+				alert("Symbol Saved");
+			}
+			
+			function deleteSymbol( symbol ) 
+			{
+	
+				var delStmt = new air.SQLStatement();
+				delStmt.sqlConnection = getDBConn();
+				var sql = "";
+				sql = sql + "DELETE FROM stocks WHERE symbol = '" + symbol + "'";
+				delStmt.text = sql;
+		
+				delStmt.execute();
+				
+			}
+			
+			function loadSymbols()
+			{
+				if (db == null) {
+					setTimeout('loadSymbols()', 1000);
+				}
+				
+				var qry = new air.SQLStatement();
+				var sql = "SELECT * FROM stocks";
+				qry.text = sql;
+				qry.sqlConnection = getDBConn();
+				
+				qry.execute();
+					
+				return qry.getResult().data;			
+			}
+	  </script>
+</head>
+
+<body onload="doLoad();" onunload="doUnload();">
+ <iframe id="UI"
+		    src="stocks.html"
+		    sandboxRoot="http://universalmind.com/"
+		    documentRoot="app-resource:/"
+		    width="100%" 
+		    height="100%"
+		    style="border: 0px; margin: 0px; padding: 0px; width: 90%;">
+
+</body>
+
+
+</html>
