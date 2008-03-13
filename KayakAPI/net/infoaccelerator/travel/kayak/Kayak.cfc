@@ -7,7 +7,8 @@
 		variables.token     				= "";
 		variables.lastToken 				= "";
 		variables.baseURL   				= "http://api.kayak.com";
-		variables.flightSearchValidator 	= createObject('component', 'net.infoaccelerator.travel.kayak.validators.SearchValidator');
+		variables.flightSearchValidator 	= createObject('component', 'net.infoaccelerator.travel.kayak.validators.FlightSearchValidator');
+		variables.flightSearchFormatter 	= createObject('component', 'net.infoaccelerator.travel.kayak.formatters.FlightSearchFormatter');
 	</cfscript>
 	
 	<cffunction name="init" access="public" returntype="net.infoaccelerator.travel.kayak.Kayak" output="false">
@@ -38,24 +39,44 @@
 		<cfargument name="oneway" 		type="boolean" 	required="true"		/>
 		<cfargument name="origin" 		type="boolean" 	required="true"		/>
 		<cfargument name="destination" 	type="boolean" 	required="true"		/>
-		<cfargument name="depart" 		type="date"    	required="true"		/>
-		<cfargument name="return" 		type="date"	 	required="true"		/>
-		<cfargument name="departTime" 	type="string" 	required="true"		/>
+		<cfargument name="depart_date" 	type="date"    	required="true"		/>
+		<cfargument name="return_date" 	type="date"	 	required="true"		/>
+		<cfargument name="depart_time" 	type="string" 	required="true"		/>
 		<cfargument name="travelers"  	type="numeric" 	required="true"		/>
 		<cfargument name="cabin"	  	type="string" 	required="true"		/>
 		
 				
-		<cfset var basicmode  = "true"/>
-		<cfset var action     = "doFlights"/>
-		<cfset var apimode	  = variables.version/>
-		<cfset var sid		  = getSession()/>
-		<cfset var url		  = variables.baseURL & "/s/apisearch?basicmode=" & basicmode & "&action=" & action & "&apimode=" & apimode & "&_sid_=" & sid & "&version=" & variables.version/>
-		<cfset var httpResult = structNew()/>
+		<cfset var basicmode  	= "true"/>
+		<cfset var action     	= "doFlights"/>
+		<cfset var apimode	  	= variables.version/>
+		<cfset var sid		  	= getSession()/>
+		<cfset var url		  	= variables.baseURL & "/s/apisearch?basicmode=" & basicmode & "&action=" & action & "&apimode=" & apimode & "&_sid_=" & sid & "&version=" & variables.version/>
+		<cfset var urlKeys    	= listToArray(structKeyList(arguments,","),",")/>
+		<cfset var keyLen     	= arrayLen(urlKeys)/>
+		<cfset var i		  	= 1/>
+		<cfset var httpResult 	= structNew()/>
+		<cfset var xmlResult  	= xmlNew()/>
+		<cfset var searchResult = structNew()/>
 		
 		
 		<cfif variables.searchValidator.validate(arguments)>
-		
+			<cfset arguments = variables.flightSearchFormatter.format(arguments)/>
+			
+			<cfloop from="1" to="#keyLen#" index="i">
+				<cfset url = url & "&" & urlKeys[i] & "=" & urlencodedFormat(arguments[urlKeys[i]])/>
+			</cfloop>
+			
+			<cfhttp url="#url#" result="httpResult" method="GET"/>
+			<cfset xmlResult 			= xmlParse(httpResult.fileContent)/>
+			<cfset searchResult.url	 	= xmlResult.search.url.XmlText/>
+			<cfset searchResult.id  	= xmlResult.search.searchid.XmlText/>
+			<cfset searchResult.status 	= "ok"/>
+			<cfelse>
+				<cfset searchResult.status = "fail"/>
+				<cfset searchResult.msg    = "Validation Failed"/>
 		</cfif>
+		
+		<cfreturn searchResult/>
 	</cffunction>
 	
 	
