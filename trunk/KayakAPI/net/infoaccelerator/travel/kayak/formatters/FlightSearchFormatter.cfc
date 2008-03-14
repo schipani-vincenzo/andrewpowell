@@ -1,5 +1,6 @@
-<cfcomponent output="false" implements="SerchFormatter">
-	<cffunction name="format" access="public" returntype="struct" output="false">
+<cfcomponent output="false" implements="SearchFormatter">
+	<cffunction name="format" access="public" returntype="struct">
 		<cfargument name="subject" type="struct" required="true"/>
+		<cfreturn structNew()/>
 	</cffunction>
 </cfcomponent>
