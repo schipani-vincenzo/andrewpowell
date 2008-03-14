@@ -20,7 +20,7 @@
 		
 	</cffunction>
 	
-	<cffunction name="getSession" access="private" returntype="string" output="false">
+	<cffunction name="getSession" access="public" returntype="string" output="false">
 		<cfset var url 			 = variables.baseURL & "/k/ident/apisession?version=" & variables.version & "&token=" & variables.key />
 		<cfset var sessionResult = structNew() 																											/>
 		<cfset var xmlResult     = xmlNew()																												/>
