@@ -31,7 +31,7 @@
 	
 	<cffunction name="formatOneway" access="private" returntype="string" output="false">
 		<cfargument name="target" type="boolean" required="true"/>
-		<cfif argument.target>
+		<cfif arguments.target>
 			<cfreturn "y"/>
 			<cfelse>
 				<cfreturn "n"/>
