@@ -18,8 +18,8 @@
 		this.equipment	=	"";
 		this.miles		=	 0;
 		this.origin		=	"";
-		this.departure  = 	createDateTime(0,0,0,0,0,0);
-		this.arrival	=	createDateTime(0,0,0,0,0,0);
+		this.departure  = 	createDateTime(1970,1,1,0,0,0);
+		this.arrival	=	createDateTime(1970,1,1,0,0,0);
 		this.destination=	"";
 		this.cabin 		= 	"";
 	</cfscript>

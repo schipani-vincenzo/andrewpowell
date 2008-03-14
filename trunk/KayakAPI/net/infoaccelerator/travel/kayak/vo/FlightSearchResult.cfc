@@ -8,6 +8,6 @@
 		this.searchInstance	=	"";
 		this.searchID		=	"";
 		this.count			=	 0;
-		this.trips			=	arrayNew();
+		this.trips			=	arrayNew(1);
 	</cfscript>
 </cfcomponent>

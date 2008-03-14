@@ -30,8 +30,7 @@ Modified:		3/14/2008
 	
 	<cfscript>
 		variables.version   				=  1;
-		//TODO:  take this value out after testing;
-		variables.key						= "ELbI0KUodURBLn2_16Gh_A";
+		variables.key						= "";
 		variables.token     				= "";
 		variables.lastToken 				= "";
 		variables.baseURL   				= "http://api.kayak.com";
@@ -116,7 +115,6 @@ Modified:		3/14/2008
 			
 			<cfset xmlResult 			= xmlParse(httpResult.fileContent)											/>
 			
-			<cfset searchResult.url	 	= mid(xmlResult.search.url.XmlText,9,len(xmlResult.search.url.XmlText)-10)	/>
 			<cfset searchResult.id  	= xmlResult.search.searchid.XmlText											/>
 			<cfset searchResult.status 	= "ok"																		/>
 			<cfset searchResult.cookies = getCookies(httpResult["Responseheader"]["Set-Cookie"])					/>
@@ -128,7 +126,7 @@ Modified:		3/14/2008
 		<cfreturn searchResult/>
 	</cffunction>
 	
-	<cffunction name="pollFlightResults" access="public" returntype="xml" output="false">
+	<cffunction name="pollFlightResults" access="private" returntype="xml" output="false">
 		<cfargument name="searchID" 	type="string" 	required="true"/>
 		<cfargument name="session"		type="string"	required="true"/>
 		<cfargument name="resultCount"	type="numeric"	required="true"/>
@@ -162,6 +160,92 @@ Modified:		3/14/2008
 		</cfhttp>
 			
 		<cfreturn xmlParse(httpResult.fileContent)/>
+	</cffunction>
+	
+	<cffunction name="getFlightResults" access="public" returntype="net.infoaccelerator.travel.kayak.vo.FlightSearchResult" output="false">
+		<cfargument name="searchID" 	type="string" 	required="true"/>
+		<cfargument name="session"		type="string"	required="true"/>
+		<cfargument name="resultCount"	type="numeric"	required="true"/>
+		<cfargument name="filterMode"	type="string"	required="true"/>
+		<cfargument name="airline"		type="string"	required="true"/>
+		<cfargument name="sortDir"		type="string"	required="true"/>
+		<cfargument name="sortKey"		type="string"	required="true"/>
+		<cfargument name="cookies"		type="array"	required="true"/>
+		
+		<cfset var morepending = true/>
+		<cfset var searchResults = createObject('component','net.infoaccelerator.travel.kayak.vo.FlightSearchResult')/>
+		<cfset var poll = ""/>
+		<cfset var trips = ""/>
+		<cfset var legs  = ""/>
+		<cfset var currentTrip = ""/>
+		<cfset var cLeg = ""/>
+		<cfset var segs = ""/>
+		<cfset var cSeg = ""/>
+		<cfset var jThread = createObject('java','java.lang.Thread').init()/>
+		
+		<cfloop condition="morepending">
+			<cfset poll = pollFlightResults(arguments.searchid,arguments.session,arguments.resultCount,arguments.filterMode,arguments.airline,arguments.sortDir,arguments.sortKey,arguments.cookies)/>
+			
+			<cfset searchResults.searchID = poll.searchresult.searchid.XmlText/>
+			<cfset serachResults.count    = poll.searchresult.count.XmlText/>
+			
+			<cfset trips = xmlSearch(poll,'/searchresult/trips/trip')/>
+			
+			<cfloop from="1" to="#arrayLen(trips)#" index="i">
+				<cfset currentTrip = createObject('component','net.infoaccelerator.travel.kayak.vo.Trip')>
+				<cfset currentTrip.price = trips[i].price.XmlText/>
+				<cfset currentTrip.url   = trips[i].price.XmlAttributes.url/>
+				<cfset currentTrip.currency = trips[i].price.XmlAttributes.currency/>
+				
+				<cfset legs = xmlSearch(poll,'/searchresult/trips/trip[#i#]/legs/leg')>
+		
+				<cfloop from="1" to="#arrayLen(legs)#" index="x">
+					<cfset cLeg = createObject('component','net.infoaccelerator.travel.kayak.vo.Leg')/>
+					<cfset cLeg.airline			=	legs[x].airline.XmlText/>
+					<cfset cLeg.airlineName		=	legs[x].airline_display.XmlText/>
+					<cfset cLeg.origin			=	legs[x].orig.XmlText/>
+					<cfset cLeg.destination		=	legs[x].dest.XmlText/>
+					<cfset cLeg.depart			=	legs[x].depart.XmlText/>
+					<cfset cLeg.arrive			=	legs[x].arrive.XmlText/>
+					<cfset cLeg.stops			=	legs[x].stops.XmlText/>
+					<cfset cLeg.mDuration		=	legs[x].duration_minutes.XmlText/>
+					<cfset cLeg.cabin			=	legs[x].cabin.XmlText/>
+					<cfset segs = xmlSearch(poll,'/searchresult/trips/trip[#i#]/legs/leg[#x#]/segment')>
+		
+					<cfloop from="1" to="#arrayLen(segs)#" index="y">
+						<cfset cSeg = createObject('component','net.infoaccelerator.travel.kayak.vo.Segment')/>
+						<cfset cSeg.airline		=	segs[y].airline.XmlText/>
+						<cfset cSeg.flight		=	segs[y].flight.XmlText/>
+						<cfset cSeg.mDuration	=	segs[y].duration_minutes.XmlText/>
+						<cfset cSeg.equipment	=	segs[y].equip.XmlText/>
+						<cfset cSeg.miles		=	segs[y].miles.XmlText/>
+						<cfset cSeg.origin		=	segs[y].o.XmlText/>
+						<cfset cSeg.departure  	= 	segs[y].dt.XmlText/>
+						<cfset cSeg.arrival		=	segs[y].at.XmlText/>
+						<cfset cSeg.destination	=	segs[y].d.XmlText/>
+						<cfset cSeg.cabin 		= 	segs[y].cabin.XmlText/>
+						<cfset arrayAppend(cLeg.segments,cSeg)/>
+					</cfloop>
+					
+					<cfset arrayAppend(currentTrip.legs,cLeg)/>
+				</cfloop>
+				<cfset arrayAppend(searchResults.trips,currentTrip)/>
+			</cfloop>
+			
+			
+			<cfif poll.searchresult.morepending.XmlText EQ "">
+				<cfset morepending = false/>
+				<cfelse>
+					<cfset morepending = true/>
+			</cfif>
+			
+		
+			<cfset jThread.sleep(5000)/>
+		</cfloop>
+		
+		<cfset searchResults.count = arrayLen(searchresults.trips)/>
+		
+		<cfreturn searchResults/>
 	</cffunction>
 	
 	

@@ -15,8 +15,8 @@
 		this.airlineName	=	"";
 		this.origin			=	"";
 		this.destination	=	"";
-		this.depart			=	createDateTime(0,0,0,0,0,0);
-		this.arrive			=	createDateTime(0,0,0,0,0,0);
+		this.depart			=	createDateTime(1970,1,1,0,0,0);
+		this.arrive			=	createDateTime(1970,1,1,0,0,0);
 		this.stops			=	 0;
 		this.mDuration		=	 0;
 		this.cabin			=	"";
