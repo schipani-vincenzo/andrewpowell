@@ -126,6 +126,50 @@ Modified:		3/14/2008
 		<cfreturn searchResult/>
 	</cffunction>
 	
+	<cffunction name="startHotelSearch" access="public" returntype="struct" output="false">
+		<cfargument name="oneway" 			type="boolean" 	required="true"		/>
+		<cfargument name="othercity"		type="string" 	required="true"		/>
+		<cfargument name="checkin_date"		type="date"    	required="true"		/>
+		<cfargument name="checkout_date"	type="date"	 	required="true"		/>
+		<cfargument name="guests1"  		type="numeric" 	required="true"		/>
+		<cfargument name="rooms"	  		type="numeric" 	required="true"		/>
+		<cfargument name="session"			type="string"	required="true"		/>
+		
+				
+		<cfset var basicmode  	= "true"/>
+		<cfset var action     	= "dohotels"/>
+		<cfset var apimode	  	= variables.version/>
+		<cfset var url		  	= variables.baseURL & "/s/apisearch?basicmode=" & basicmode & "&action=" & action & "&apimode=" & apimode & "&_sid_=" & urlencodedFormat(arguments.session) & "&version=" & variables.version/>
+		<cfset var urlKeys    	= listToArray(structKeyList(arguments,","),",")/>
+		<cfset var keyLen     	= arrayLen(urlKeys)/>
+		<cfset var i		  	= 1/>
+		<cfset var httpResult 	= structNew()/>
+		<cfset var xmlResult  	= xmlNew()/>
+		<cfset var searchResult = structNew()/>
+		
+		
+		<cfif variables.flightSearchValidator.validate(arguments)>
+			<cfset arguments = variables.flightSearchFormatter.format(arguments)/>
+			
+			<cfloop from="1" to="#keyLen#" index="i">
+				<cfset url = url & "&" & lcase(urlKeys[i]) & "=" & urlencodedFormat(arguments[urlKeys[i]])/>
+			</cfloop>
+			
+			<cfhttp url="#url#" result="httpResult" method="GET" proxyserver="127.0.0.1" proxyport="8184" 			/>
+			
+			<cfset xmlResult 			= xmlParse(httpResult.fileContent)											/>
+			
+			<cfset searchResult.id  	= xmlResult.search.searchid.XmlText											/>
+			<cfset searchResult.status 	= "ok"																		/>
+			<cfset searchResult.cookies = getCookies(httpResult["Responseheader"]["Set-Cookie"])					/>
+			<cfelse>
+				<cfset searchResult.status = "fail"/>
+				<cfset searchResult.msg    = "Validation Failed"/>
+		</cfif>
+		
+		<cfreturn searchResult/>
+	</cffunction>
+	
 	<cffunction name="pollFlightResults" access="private" returntype="xml" output="false">
 		<cfargument name="searchID" 	type="string" 	required="true"/>
 		<cfargument name="session"		type="string"	required="true"/>
