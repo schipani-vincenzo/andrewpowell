@@ -9,6 +9,7 @@
        this.setClientCookies = "yes";
        this.setDomainCookies = "no";
        this.scriptProtect = "all";   
+	   this.mappings["/net"] = expandPath("/kayak/net");
    </cfscript>
    
    <cffunction name="onApplicationStart" output="false">
