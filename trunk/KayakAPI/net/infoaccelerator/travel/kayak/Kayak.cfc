@@ -36,6 +36,8 @@ Modified:		3/14/2008
 		variables.baseURL   				= "http://api.kayak.com";
 		variables.flightSearchValidator 	= createObject('component', 'net.infoaccelerator.travel.kayak.validators.FlightSearchValidator');
 		variables.flightSearchFormatter 	= createObject('component', 'net.infoaccelerator.travel.kayak.formatters.FlightSearchFormatter');
+		variables.hotelSearchValidator 		= createObject('component', 'net.infoaccelerator.travel.kayak.validators.HotelSearchValidator');
+		variables.hotelSearchFormatter 		= createObject('component', 'net.infoaccelerator.travel.kayak.formatters.HotelSearchFormatter');
 	</cfscript>
 	
 	<cffunction name="init" access="public" returntype="net.infoaccelerator.travel.kayak.Kayak" output="false">
@@ -127,7 +129,7 @@ Modified:		3/14/2008
 	</cffunction>
 	
 	<cffunction name="startHotelSearch" access="public" returntype="struct" output="false">
-		<cfargument name="oneway" 			type="boolean" 	required="true"		/>
+
 		<cfargument name="othercity"		type="string" 	required="true"		/>
 		<cfargument name="checkin_date"		type="date"    	required="true"		/>
 		<cfargument name="checkout_date"	type="date"	 	required="true"		/>
@@ -148,8 +150,8 @@ Modified:		3/14/2008
 		<cfset var searchResult = structNew()/>
 		
 		
-		<cfif variables.flightSearchValidator.validate(arguments)>
-			<cfset arguments = variables.flightSearchFormatter.format(arguments)/>
+		<cfif variables.hotelSearchValidator.validate(arguments)>
+			<cfset arguments = variables.hotelSearchFormatter.format(arguments)/>
 			
 			<cfloop from="1" to="#keyLen#" index="i">
 				<cfset url = url & "&" & lcase(urlKeys[i]) & "=" & urlencodedFormat(arguments[urlKeys[i]])/>
