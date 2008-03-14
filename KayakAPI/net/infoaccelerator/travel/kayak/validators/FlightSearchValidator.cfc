@@ -3,15 +3,20 @@
 	<cffunction name="validate" access="public" returntype="boolean" output="false">
 		<cfargument name="subject" type="struct" required="true"/>
 			<cfscript>
-				if(validateAirportCode(arguments.origin)){
-					if(validateAirportCode(arguments.destination)){
-						if(validateDate(arguments.depart_date)){
-							if(validateDate(arguments.return_date)){
-								if(validateTime(arguments.depart_time)){
-									if(validateTime(arguments.return_time)){
-										if(validatePassengerCount(arguments.travelers)){
-											if(validatCabin(arguments.cabin)){
-												return true;
+				if(validateAirportCode(arguments.subject.origin)){
+					if(validateAirportCode(arguments.subject.destination)){
+						if(validateDate(arguments.subject.depart_date)){
+							if(validateDate(arguments.subject.return_date)){
+								if(validateTime(arguments.subject.depart_time)){
+									if(validateTime(arguments.subject.return_time)){
+										if(validatePassengerCount(arguments.subject.travelers)){
+											if(validateCabin(arguments.subject.cabin)){
+												if(validateOneway(arguments.subject.oneway)){
+													return true;
+												}
+												else{
+													return false;
+												}
 											}
 											else{
 												return false;
@@ -106,6 +111,11 @@
 				return false;
 			}
 		</cfscript>
+	</cffunction>
+	
+	<cffunction name="validateOneway" access="private" returntype="boolean" output="false">
+		<cfargument name="target" type="boolean" required="true"/>
+		<cfreturn true/>
 	</cffunction>
 	
 	

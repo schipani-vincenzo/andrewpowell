@@ -67,6 +67,7 @@
 			</cfloop>
 			
 			<cfhttp url="#url#" result="httpResult" method="GET"/>
+			
 			<cfset xmlResult 			= xmlParse(httpResult.fileContent)/>
 			<cfset searchResult.url	 	= xmlResult.search.url.XmlText/>
 			<cfset searchResult.id  	= xmlResult.search.searchid.XmlText/>
