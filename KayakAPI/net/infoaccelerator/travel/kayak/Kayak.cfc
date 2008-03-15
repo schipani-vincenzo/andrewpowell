@@ -54,11 +54,18 @@ Modified:		3/14/2008
 		<cfset var sessionResult = structNew() 																											/>
 		<cfset var xmlResult     = xmlNew()																												/>
 		
-		<cfhttp url="#url#" result="sessionResult" method="get"/>
-		<cfset xmlResult = xmlParse(sessionResult.FileContent)/>
-						
-		<cfreturn xmlResult.ident.sid.XmlText/>		
-
+		<cfhttp url="#url#" result="sessionResult" method="GET" />
+		<cftry>
+			<cfif mid(sessionResult.StatusCode,1,3) EQ "200">				
+				<cfset xmlResult = xmlParse(trim(sessionResult.FileContent))/>			
+				<cfreturn xmlResult.ident.sid.XmlText/>
+				<cfelse>
+					<cfthrow message="Error Obtaining Session ID" type="communication" errorcode="#sessionResult.StatusCode#" extendedinfo="#sessionResult.FileContent#">		
+			</cfif>
+			<cfcatch type="any">
+				<cfthrow message="Error Obtaining Session ID" type="communication" errorcode="#sessionResult.StatusCode#" extendedinfo="#sessionResult.FileContent#">
+			</cfcatch>
+		</cftry>
 	</cffunction>
 	
 	<cffunction name="getCookies" access="private" returntype="array" output="false">
@@ -157,7 +164,7 @@ Modified:		3/14/2008
 				<cfset url = url & "&" & lcase(urlKeys[i]) & "=" & urlencodedFormat(arguments[urlKeys[i]])/>
 			</cfloop>
 			
-			<cfhttp url="#url#" result="httpResult" method="GET" proxyserver="127.0.0.1" proxyport="8184" 			/>
+			<cfhttp url="#url#" result="httpResult" method="GET" 													/>
 			
 			<cfset xmlResult 			= xmlParse(httpResult.fileContent)											/>
 			
@@ -208,6 +215,49 @@ Modified:		3/14/2008
 		<cfreturn xmlParse(httpResult.fileContent)/>
 	</cffunction>
 	
+	<cffunction name="pollHotelResults" access="private" returntype="xml" output="false">
+		<cfargument name="searchID" 	type="string" 	required="true"/>
+		<cfargument name="session"		type="string"	required="true"/>
+		<cfargument name="resultCount"	type="numeric"	required="true"/>
+		<cfargument name="filterMode"	type="string"	required="true"/>
+		<cfargument name="sortDir"		type="string"	required="true"/>
+		<cfargument name="sortKey"		type="string"	required="true"/>
+		<cfargument name="cookies"		type="array"	required="true"/>
+		
+		<cfset var version 		= variables.version	/>
+		<cfset var apimode 		= variables.version	/>
+		<cfset var httpResult	= structNew()		/>
+		<cfset var tryAgain     = true				/>
+		<cfset var resultXML	= xmlNew()			/>		
+		<cfset var url = variables.baseURL & "/s/apibasic/flight?_sid_=" & arguments.session & "&version=" & variables.version & "&apimode=" & apimode/>
+		<cfset var jThread      = createObject('java','java.lang.Thread').init()/>
+		<cfset url = url & "&searchid=" & arguments.searchid/>
+		<cfset url = url & "&c=" & arguments.resultCount/>
+		<cfset url = url & "&m=" & arguments.filterMode/>
+		<cfset url = url & "&d=" & arguments.sortDir/>
+		<cfset url = url & "&s=" & arguments.sortKey/>
+		
+		<cfloop condition="#tryAgain#">	
+			<cftry>
+				<cfhttp url="#url#" result="httpResult" method="POST" proxyserver="127.0.0.1" proxyport="8184">
+					<cfloop from="1" to="#arraylen(arguments.cookies)#" index="i">
+						<cfif arguments.cookies[i].name NEQ "Apache">
+							<cfhttpparam type="Cookie" value="#arguments.cookies[i].value#" name="#arguments.cookies[i].name#" >
+						</cfif>
+					</cfloop>
+				</cfhttp>
+				<cfset resultXML = xmlParse(httpResult.fileContent) />
+				<cfset tryAgain = false/>
+				<cfcatch type="any">
+					<cfset tryAgain = true/>
+					<cfset jThread.sleep(5000)/>
+				</cfcatch>
+			</cftry>
+		</cfloop>
+			
+		<cfreturn resultXML/>
+	</cffunction>
+	
 	<cffunction name="getFlightResults" access="public" returntype="net.infoaccelerator.travel.kayak.vo.FlightSearchResult" output="false">
 		<cfargument name="searchID" 	type="string" 	required="true"/>
 		<cfargument name="session"		type="string"	required="true"/>
@@ -239,9 +289,9 @@ Modified:		3/14/2008
 			
 			<cfloop from="1" to="#arrayLen(trips)#" index="i">
 				<cfset currentTrip = createObject('component','net.infoaccelerator.travel.kayak.vo.Trip')>
-				<cfset currentTrip.price = trips[i].price.XmlText/>
-				<cfset currentTrip.url   = trips[i].price.XmlAttributes.url/>
-				<cfset currentTrip.currency = trips[i].price.XmlAttributes.currency/>
+				<cfset currentTrip.price.value 		= trips[i].price.XmlText/>
+				<cfset currentTrip.price.url   		= trips[i].price.XmlAttributes.url/>
+				<cfset currentTrip.price.currency 	= trips[i].price.XmlAttributes.currency/>
 				
 				<cfset legs = xmlSearch(poll,'/searchresult/trips/trip[#i#]/legs/leg')>
 		
@@ -276,6 +326,61 @@ Modified:		3/14/2008
 					<cfset arrayAppend(currentTrip.legs,cLeg)/>
 				</cfloop>
 				<cfset arrayAppend(searchResults.trips,currentTrip)/>
+			</cfloop>
+			
+			
+			<cfif poll.searchresult.morepending.XmlText EQ "">
+				<cfset morepending = false/>
+				<cfelse>
+					<cfset morepending = true/>
+			</cfif>
+			
+		
+			<cfset jThread.sleep(5000)/>
+		</cfloop>
+		
+		<cfset searchResults.count = arrayLen(searchresults.trips)/>
+		
+		<cfreturn searchResults/>
+	</cffunction>
+	
+	<cffunction name="getHotelResults" access="public" returntype="net.infoaccelerator.travel.kayak.vo.HotelSearchResult" output="false">
+		<cfargument name="searchID" 	type="string" 	required="true"/>
+		<cfargument name="session"		type="string"	required="true"/>
+		<cfargument name="resultCount"	type="numeric"	required="true"/>
+		<cfargument name="filterMode"	type="string"	required="true"/>
+		<cfargument name="sortDir"		type="string"	required="true"/>
+		<cfargument name="sortKey"		type="string"	required="true"/>
+		<cfargument name="cookies"		type="array"	required="true"/>
+		
+		<cfset var morepending = true/>
+		<cfset var searchResults = createObject('component','net.infoaccelerator.travel.kayak.vo.HotelSearchResult')/>
+		<cfset var poll = ""/>
+		<cfset var jThread = createObject('java','java.lang.Thread').init()/>
+		<cfset var currentHotel = ""/>
+		<cfset var hotels = ""/>
+		
+		<cfloop condition="morepending">
+			<cfset poll = pollHotelResults(arguments.searchid,arguments.session,arguments.resultCount,arguments.filterMode,arguments.sortDir,arguments.sortKey,arguments.cookies)/>
+			
+			<cfset searchResults.searchID = poll.searchresult.searchid.XmlText/>
+			<cfset serachResults.count    = poll.searchresult.count.XmlText/>
+			
+			<cfset hotels = xmlSearch(poll,'/searchresult/hotels/hotel')/>
+			
+			<cfloop from="1" to="#arrayLen(hotels)#" index="i">
+				<cfset currentHotel = createObject('component','net.infoaccelerator.travel.kayak.vo.Hotel')>
+				<cfset currentHotel.price.value 		= hotels[i].price.XmlText/>
+				<cfset currentHotel.price.url   		= hotels[i].price.XmlAttributes.url/>
+				<cfset currentHotel.price.currency 		= hotels[i].price.XmlAttributes.currency/>
+				<cfset currentHotel.priceLow 			= hotels[i].pricehistorylo.XmlText/>
+				<cfset currentHotel.priceHigh 			= hotels[i].pricehistoryhi.XmlText/>
+				<cfset currentHotel.stars 				= hotels[i].stars.XmlText/>
+				<cfset currentHotel.name 				= hotels[i].name.XmlText/>
+				<cfset currentHotel.phone 				= hotels[i].phone.XmlText/>
+				<cfset currentHotel.address 			= hotels[i].address.XmlText/>
+				<cfset currentHotel.city 				= hotels[i].city.XmlText/>
+				<cfset arrayAppend(searchResults.trips,currentHotel)/>
 			</cfloop>
 			
 			
