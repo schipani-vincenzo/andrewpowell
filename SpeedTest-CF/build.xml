@@ -1,0 +1,18 @@
+<project name="KayakAPI" default="copy" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="destdir"  location="/UM/oscode/server/default/deploy/cfusion.ear/cfusion.war/speedTest"/>
+
+  <target name="copy">
+    <!-- Create the time stamp -->
+    <tstamp/>
+	<delete dir="${destdir}"/>
+	<mkdir dir="${destdir}"/>
+    <copy todir="${destdir}">
+		<fileset dir="${basedir}">
+		  	<exclude name="**/build.xml"/>
+		</fileset>
+	</copy>
+  </target>
+
+</project>
