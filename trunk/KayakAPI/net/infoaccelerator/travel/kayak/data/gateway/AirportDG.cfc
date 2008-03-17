@@ -9,7 +9,7 @@
 		<cfset var voArray       = arrayNew(1)	/>
 		
 		<cfquery dbtype="query" name="searchResults">
-			SELECT * FROM variables.airports WHERE code like '#arguments.searchString#%'
+			SELECT code,name,city,state,country FROM variables.airports WHERE code like '#arguments.searchString#%'
 		</cfquery>
 		
 		<cfoutput query="searchResults">
@@ -31,7 +31,7 @@
 		<cfset var voArray       = arrayNew(1)	/>
 		
 		<cfquery dbtype="query" name="searchResults">
-			SELECT * FROM variables.airports WHERE city like '#arguments.searchString#%'
+			SELECT code,name,city,state,country FROM variables.airports WHERE city like '#arguments.searchString#%'
 		</cfquery>
 		
 		<cfoutput query="searchResults">
@@ -53,7 +53,7 @@
 		<cfset var voArray       = arrayNew(1)	/>
 		
 		<cfquery dbtype="query" name="searchResults">
-			SELECT * FROM variables.airports WHERE city like '#arguments.searchString#%' OR code like '#arguments.searchString#%'
+			SELECT code,name,city,state,country FROM variables.airports WHERE city like '#arguments.searchString#%' OR code like '#arguments.searchString#%'
 		</cfquery>
 		
 		<cfoutput query="searchResults">

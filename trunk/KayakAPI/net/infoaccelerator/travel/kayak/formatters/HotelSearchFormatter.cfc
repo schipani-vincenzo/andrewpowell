@@ -1,4 +1,4 @@
-<cfcomponent implements="SearchFormatter" output="false">
+<cfcomponent implements="ISearchFormatter" output="false">
 	<cffunction name="format" access="public" returntype="struct">
 		<cfargument name="subject" type="struct" required="true"/>
 		<cfscript>
