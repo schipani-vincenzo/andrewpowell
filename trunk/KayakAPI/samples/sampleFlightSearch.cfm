@@ -1,9 +1,15 @@
-<cfset kayakObj = createObject('component','net.infoaccelerator.travel.kayak.Kayak')/>
-<cfset kayakObj.init("YOUR DEVELOPER KEY") />
-<cfset kSessionID = kayakObj.getSession()/>
+<!--- Instantiate the kayak component --->
+<cfset kayakObj 	= createObject('component','net.infoaccelerator.travel.kayak.Kayak').init("YOUR DEVELOPER KEY") />
 
-<cfset searchStart 		= kayakObj.startFlightSearch(false,FORM.origin,FORM.destination,FORM.depart_date,FORM.return_date,FORM.depart_time,FORM.return_time,FORM.travelers,FORM.cabin,kSessionID)/>
+<!--- Get the session id.  This is required for each search. --->
+<cfset kSessionID 	= kayakObj.getSession()/>
+
+<!--- Start the search process --->
+<cfset searchStart 	= kayakObj.startFlightSearch(false,FORM.origin,FORM.destination,FORM.depart_date,FORM.return_date,FORM.depart_time,FORM.return_time,FORM.travelers,FORM.cabin,kSessionID)/>
+
+
 <cfif searchStart.status EQ "ok">
+	<!--- This call polls the kayak service and aggregates the search and its results into a FlightSearchResult object' --->
 	<cfset flightresults 	= kayakObj.getFlightResults(searchStart.id,kSessionID,30,'normal','','up',FORM.sort,searchStart.cookies)/>
 	
 	<cfloop from="1" to="#arrayLen(flightResults.trips)#" index="i">
@@ -35,5 +41,6 @@
 	</cfloop>
 	
 	<cfelse>
+		<!--- If our search is not OK, then we get a msg back to explain the failure. --->
 		<cfoutput>#searchStart.msg#</cfoutput>
 </cfif>
