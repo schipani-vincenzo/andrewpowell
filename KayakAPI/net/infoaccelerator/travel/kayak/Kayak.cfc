@@ -89,16 +89,16 @@ Modified:		3/14/2008
 	</cffunction>
 	
 	<cffunction name="startFlightSearch" access="public" returntype="struct" output="false">
-		<cfargument name="oneway" 		type="boolean" 	required="true"		/>
-		<cfargument name="origin" 		type="string" 	required="true"		/>
-		<cfargument name="destination" 	type="string" 	required="true"		/>
-		<cfargument name="depart_date" 	type="date"    	required="true"		/>
-		<cfargument name="return_date" 	type="date"	 	required="true"		/>
-		<cfargument name="depart_time" 	type="string" 	required="true"		/>
-		<cfargument name="return_time" 	type="string" 	required="true"		/>
-		<cfargument name="travelers"  	type="numeric" 	required="true"		/>
-		<cfargument name="cabin"	  	type="string" 	required="true"		/>
-		<cfargument name="session"		type="string"	required="true"		/>
+		<cfargument name="oneway" 		type="boolean" 	required="true" 	hint="y or n"							/>
+		<cfargument name="origin" 		type="string" 	required="true" 	hint="three-letter airport code"		/>
+		<cfargument name="destination" 	type="string" 	required="true"		hint="three-letter airport code"		/>
+		<cfargument name="depart_date" 	type="date"    	required="true"		hint="date to depart"					/>
+		<cfargument name="return_date" 	type="date"	 	required="false"	hint="date to return" default=""					/>
+		<cfargument name="depart_time" 	type="string" 	required="true"		hint="Values:a = any time;r=early morning;m=morning;12=noon;n=afternoon;e=evening;l=night"		/>
+		<cfargument name="return_time" 	type="string" 	required="false"	hint="Values:a = any time;r=early morning;m=morning;12=noon;n=afternoon;e=evening;l=night" default=""	/>
+		<cfargument name="travelers"  	type="numeric" 	required="true"		hint="integer from 1-8"					/>
+		<cfargument name="cabin"	  	type="string" 	required="true"		hint="f, b or e(default) (first, business, economy/coach)"/>
+		<cfargument name="session"		type="string"	required="true"		hint="sessionid from getSession()"/>
 		
 				
 		<cfset var basicmode  	= "true"/>
@@ -117,16 +117,27 @@ Modified:		3/14/2008
 			<cfset arguments = variables.flightSearchFormatter.format(arguments)/>
 			
 			<cfloop from="1" to="#keyLen#" index="i">
-				<cfset url = url & "&" & lcase(urlKeys[i]) & "=" & urlencodedFormat(arguments[urlKeys[i]])/>
+				<cfif arguments[urlKeys[i]] NEQ "">
+					<cfset url = url & "&" & lcase(urlKeys[i]) & "=" & urlencodedFormat(arguments[urlKeys[i]])/>
+				</cfif>
 			</cfloop>
 			
 			<cfhttp url="#url#" result="httpResult" method="GET" proxyserver="127.0.0.1" proxyport="8184" 			/>
 			
 			<cfset xmlResult 			= xmlParse(httpResult.fileContent)											/>
 			
-			<cfset searchResult.id  	= xmlResult.search.searchid.XmlText											/>
-			<cfset searchResult.status 	= "ok"																		/>
-			<cfset searchResult.cookies = getCookies(httpResult["Responseheader"]["Set-Cookie"])					/>
+			<cfif xmlResult.XmlRoot.XmlName NEQ "error">
+				<cfset searchResult.id  	= xmlResult.search.searchid.XmlText											/>
+				<cfset searchResult.status 	= "ok"																		/>
+				<cfset searchResult.cookies = getCookies(httpResult["Responseheader"]["Set-Cookie"])					/>
+				<cfelse>
+					<cfset errors = xmlSearch(xmlResult,'/error/flight_errors/detail')				/>
+					<cfset searchResult.status = "fail"												/>
+					<cfset searchResult.msg	   = ""													/>
+					<cfloop from="1" to="#arrayLen(errors)#" index="i">
+						<cfset searchResult.msg	   = searchResult.msg & errors[i].XmlText & "<br/>"	/>
+					</cfloop>
+			</cfif>
 			<cfelse>
 				<cfset searchResult.status = "fail"/>
 				<cfset searchResult.msg    = "Validation Failed"/>
@@ -137,12 +148,12 @@ Modified:		3/14/2008
 	
 	<cffunction name="startHotelSearch" access="public" returntype="struct" output="false">
 
-		<cfargument name="othercity"		type="string" 	required="true"		/>
-		<cfargument name="checkin_date"		type="date"    	required="true"		/>
-		<cfargument name="checkout_date"	type="date"	 	required="true"		/>
-		<cfargument name="guests1"  		type="numeric" 	required="true"		/>
-		<cfargument name="rooms"	  		type="numeric" 	required="true"		/>
-		<cfargument name="session"			type="string"	required="true"		/>
+		<cfargument name="othercity"		type="string" 	required="true" hint="String locating the city. Should be City, RegionCode, CountryCode for US, Canada. Should be City, CountryCode for others."		/>
+		<cfargument name="checkin_date"		type="date"    	required="true"	hint="Checkin Date"							/>
+		<cfargument name="checkout_date"	type="date"	 	required="true"	hint="Checkout Date"						/>
+		<cfargument name="guests1"  		type="numeric" 	required="true" hint="integer from 1-6"						/>
+		<cfargument name="rooms"	  		type="numeric" 	required="true"	hint="integer from 1-3"						/>
+		<cfargument name="session"			type="string"	required="true" hint="Session from getSession() call"		/>
 		
 				
 		<cfset var basicmode  	= "true"/>
@@ -155,6 +166,7 @@ Modified:		3/14/2008
 		<cfset var httpResult 	= structNew()/>
 		<cfset var xmlResult  	= xmlNew()/>
 		<cfset var searchResult = structNew()/>
+		<cfset var errors		= arrayNew(1)/>
 		
 		
 		<cfif variables.hotelSearchValidator.validate(arguments)>
@@ -164,13 +176,22 @@ Modified:		3/14/2008
 				<cfset url = url & "&" & lcase(urlKeys[i]) & "=" & urlencodedFormat(arguments[urlKeys[i]])/>
 			</cfloop>
 			
-			<cfhttp url="#url#" result="httpResult" method="GET" 													/>
+			<cfhttp url="#url#" result="httpResult" method="GET" proxyserver="127.0.0.1" proxyport="8184"  			/>
 			
 			<cfset xmlResult 			= xmlParse(httpResult.fileContent)											/>
 			
-			<cfset searchResult.id  	= xmlResult.search.searchid.XmlText											/>
-			<cfset searchResult.status 	= "ok"																		/>
-			<cfset searchResult.cookies = getCookies(httpResult["Responseheader"]["Set-Cookie"])					/>
+			<cfif xmlResult.XmlRoot.XmlName NEQ "error">
+				<cfset searchResult.id  	= xmlResult.search.searchid.XmlText											/>
+				<cfset searchResult.status 	= "ok"																		/>
+				<cfset searchResult.cookies = getCookies(httpResult["Responseheader"]["Set-Cookie"])					/>
+				<cfelse>
+					<cfset errors = xmlSearch(xmlResult,'/error/hotel_errors/detail')				/>
+					<cfset searchResult.status = "fail"												/>
+					<cfset searchResult.msg	   = ""													/>
+					<cfloop from="1" to="#arrayLen(errors)#" index="i">
+						<cfset searchResult.msg	   = searchResult.msg & errors[i].XmlText & "<br/>"	/>
+					</cfloop>
+			</cfif>
 			<cfelse>
 				<cfset searchResult.status = "fail"/>
 				<cfset searchResult.msg    = "Validation Failed"/>
@@ -220,6 +241,7 @@ Modified:		3/14/2008
 		<cfargument name="session"		type="string"	required="true"/>
 		<cfargument name="resultCount"	type="numeric"	required="true"/>
 		<cfargument name="filterMode"	type="string"	required="true"/>
+		<cfargument name="filterStars"	type="numeric"	required="false" default="0">
 		<cfargument name="sortDir"		type="string"	required="true"/>
 		<cfargument name="sortKey"		type="string"	required="true"/>
 		<cfargument name="cookies"		type="array"	required="true"/>
@@ -233,7 +255,11 @@ Modified:		3/14/2008
 		<cfset var jThread      = createObject('java','java.lang.Thread').init()/>
 		<cfset url = url & "&searchid=" & arguments.searchid/>
 		<cfset url = url & "&c=" & arguments.resultCount/>
-		<cfset url = url & "&m=" & arguments.filterMode/>
+		<cfif arguments.filterMode NEQ "stars">
+			<cfset url = url & "&m=" & arguments.filterMode/>
+			<cfelse>
+				<cfset url = url & "&m=" & arguments.filterMode & ":" & arguments.filterStars/>
+		</cfif>
 		<cfset url = url & "&d=" & arguments.sortDir/>
 		<cfset url = url & "&s=" & arguments.sortKey/>
 		
@@ -345,13 +371,14 @@ Modified:		3/14/2008
 	</cffunction>
 	
 	<cffunction name="getHotelResults" access="public" returntype="net.infoaccelerator.travel.kayak.vo.HotelSearchResult" output="false">
-		<cfargument name="searchID" 	type="string" 	required="true"/>
-		<cfargument name="session"		type="string"	required="true"/>
-		<cfargument name="resultCount"	type="numeric"	required="true"/>
-		<cfargument name="filterMode"	type="string"	required="true"/>
-		<cfargument name="sortDir"		type="string"	required="true"/>
-		<cfargument name="sortKey"		type="string"	required="true"/>
-		<cfargument name="cookies"		type="array"	required="true"/>
+		<cfargument name="searchID" 	type="string" 	required="true" hint="search id needed for polling"/>
+		<cfargument name="session"		type="string"	required="true" hint="the session id returned from the initial getSession call"/>
+		<cfargument name="resultCount"	type="numeric"	required="true" hint="the number of results to return"/>
+		<cfargument name="filterMode"	type="string"	required="true" hint="filter mode: normal or stars"/>
+		<cfargument name="filterStars"	type="numeric"	required="false" default="0" hint="if filterMode = stars, then must be 1,2,3,4,or 5">
+		<cfargument name="sortDir"		type="string"	required="true" hint="sort direction: up or down"/>
+		<cfargument name="sortKey"		type="string"	required="true" hint="sort key: price,stars,hotel,distance"/>
+		<cfargument name="cookies"		type="array"	required="true" hint="the cookie struct returned from the intial search"/>
 		
 		<cfset var morepending = true/>
 		<cfset var searchResults = createObject('component','net.infoaccelerator.travel.kayak.vo.HotelSearchResult')/>
@@ -369,18 +396,23 @@ Modified:		3/14/2008
 			<cfset hotels = xmlSearch(poll,'/searchresult/hotels/hotel')/>
 			
 			<cfloop from="1" to="#arrayLen(hotels)#" index="i">
-				<cfset currentHotel = createObject('component','net.infoaccelerator.travel.kayak.vo.Hotel')>
-				<cfset currentHotel.price.value 		= hotels[i].price.XmlText/>
-				<cfset currentHotel.price.url   		= hotels[i].price.XmlAttributes.url/>
-				<cfset currentHotel.price.currency 		= hotels[i].price.XmlAttributes.currency/>
-				<cfset currentHotel.priceLow 			= hotels[i].pricehistorylo.XmlText/>
-				<cfset currentHotel.priceHigh 			= hotels[i].pricehistoryhi.XmlText/>
-				<cfset currentHotel.stars 				= hotels[i].stars.XmlText/>
-				<cfset currentHotel.name 				= hotels[i].name.XmlText/>
-				<cfset currentHotel.phone 				= hotels[i].phone.XmlText/>
-				<cfset currentHotel.address 			= hotels[i].address.XmlText/>
-				<cfset currentHotel.city 				= hotels[i].city.XmlText/>
-				<cfset arrayAppend(searchResults.trips,currentHotel)/>
+				<cfset currentHotel = createObject('component','net.infoaccelerator.travel.kayak.vo.Hotel')/>
+				<cfset currentHotel.id					= hotels[i].id.XmlText						/>
+				<cfset currentHotel.price.value 		= hotels[i].price.XmlText					/>
+				<cfset currentHotel.price.url   		= hotels[i].price.XmlAttributes.url			/>
+				<cfset currentHotel.price.currency 		= hotels[i].price.XmlAttributes.currency	/>
+				<cfset currentHotel.priceLow 			= hotels[i].pricehistorylo.XmlText			/>
+				<cfset currentHotel.priceHigh 			= hotels[i].pricehistoryhi.XmlText			/>
+				<cfset currentHotel.stars 				= hotels[i].stars.XmlText					/>
+				<cfset currentHotel.name 				= hotels[i].name.XmlText					/>
+				<cfset currentHotel.phone 				= hotels[i].phone.XmlText					/>
+				<cfset currentHotel.address 			= hotels[i].address.XmlText					/>
+				<cfset currentHotel.lat 				= hotels[i].lat.XmlText						/>
+				<cfset currentHotel.lon 				= hotels[i].lon.XmlText						/>
+				<cfset currentHotel.city 				= hotels[i].city.XmlText					/>
+				<cfset currentHotel.region 				= hotels[i].region.XmlText					/>
+				<cfset currentHotel.country 				= hotels[i].country.XmlText				/>
+				<cfset arrayAppend(searchResults.hotels,currentHotel)								/>
 			</cfloop>
 			
 			
@@ -394,7 +426,7 @@ Modified:		3/14/2008
 			<cfset jThread.sleep(5000)/>
 		</cfloop>
 		
-		<cfset searchResults.count = arrayLen(searchresults.trips)/>
+		<cfset searchResults.count = arrayLen(searchresults.hotels)/>
 		
 		<cfreturn searchResults/>
 	</cffunction>
