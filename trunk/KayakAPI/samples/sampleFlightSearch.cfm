@@ -1,5 +1,5 @@
 <cfset kayakObj = createObject('component','net.infoaccelerator.travel.kayak.Kayak')/>
-<cfset kayakObj.init("ELbI0KUodURBLn2_16Gh_A") />
+<cfset kayakObj.init("YOUR DEVELOPER KEY") />
 <cfset kSessionID = kayakObj.getSession()/>
 
 <cfset searchStart 		= kayakObj.startFlightSearch(false,FORM.origin,FORM.destination,FORM.depart_date,FORM.return_date,FORM.depart_time,FORM.return_time,FORM.travelers,FORM.cabin,kSessionID)/>
