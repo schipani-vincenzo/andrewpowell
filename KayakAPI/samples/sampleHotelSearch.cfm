@@ -1,5 +1,5 @@
 <cfset kayakObj = createObject('component','net.infoaccelerator.travel.kayak.Kayak')/>
-<cfset kayakObj.init("ELbI0KUodURBLn2_16Gh_A") />
+<cfset kayakObj.init("YOUR DEVELOPER KEY") />
 <cfset kSessionID = kayakObj.getSession()/>
 
 <cfset results 		= kayakObj.startHotelSearch(FORM.othercity,FORM.checkin_date,FORM.checkout_date,FORM.guests1,FORM.rooms,kSessionID)		/>
