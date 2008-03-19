@@ -2,7 +2,7 @@ package net.infoaccelerator.travel.kayak.formatters
 {
 	import mx.formatters.DateFormatter;
 	
-	public class FlightSearchFormatter implements IFormatter
+	public class FlightSearchFormatter implements ISearchFormatter
 	{
 		public function FlightSearchFormatter()
 		{
@@ -17,6 +17,14 @@ package net.infoaccelerator.travel.kayak.formatters
 			
 			flightDateFormatter.formatString = "MM/DD/YYYY";
 			return flightDateFormatter.format(rawDate);
+		}
+		
+		private function formatToLower(rawString:String):String{
+			return rawString.toLowerCase();			
+		}
+		
+		private function formatOneway(rawBool:Boolean):String{
+			return (rawBool ? "y" : "n");
 		}
 		
 	}
