@@ -8,8 +8,12 @@ package net.infoaccelerator.travel.kayak.formatters
 		{
 		}
 
-		public function format(subject:Object):void
+		public function format(subject:Object):Object
 		{
+			subject.depart_date = formatDate(subject.depart_date);
+			subject.return_date = formatDate(subject.return_date);	
+			
+			return subject;
 		}
 		
 		private function formatDate(rawDate:Date):String{

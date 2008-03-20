@@ -15,6 +15,13 @@ package net.infoaccelerator.travel.kayak.validators
 			return ((target.length == 3) ? true : false);
 		}
 		
+		public function validateDate(target:Date):Boolean{
+			if(target >= new Date())
+				return true;
+				else
+					return false;
+		}
+		
 		public function validateTime(target:String):Boolean{
 			if(target == "a" 
 			|| target == "r" 

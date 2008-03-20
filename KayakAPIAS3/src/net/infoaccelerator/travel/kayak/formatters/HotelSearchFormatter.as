@@ -6,8 +6,9 @@ package net.infoaccelerator.travel.kayak.formatters
 		{
 		}
 
-		public function format(subject:Object):void
-		{
+		public function format(subject:Object):Object
+		{			
+			return null;
 		}
 		
 	}
