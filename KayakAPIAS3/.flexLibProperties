@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties version="1">
-<includeClasses>
-<classEntry path="net.infoaccelerator.travel.kayak.validators.FlightSearchValidator"/>
-<classEntry path="net.infoaccelerator.travel.kayak.formatters.HotelSearchFormatter"/>
-<classEntry path="net.infoaccelerator.travel.kayak.formatters.FlightSearchFormatter"/>
-<classEntry path="net.infoaccelerator.travel.kayak.Kayak"/>
-</includeClasses>
-<includeResources/>
-<namespaceManifests/>
+  <includeClasses>
+    <classEntry path="net.infoaccelerator.travel.kayak.formatters.FlightSearchFormatter"/>
+    <classEntry path="net.infoaccelerator.travel.kayak.formatters.HotelSearchFormatter"/>
+    <classEntry path="net.infoaccelerator.travel.kayak.validators.FlightSearchValidator"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
 </flexLibProperties>
