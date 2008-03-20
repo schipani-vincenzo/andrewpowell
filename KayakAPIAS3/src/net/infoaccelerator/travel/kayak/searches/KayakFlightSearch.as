@@ -1,4 +1,4 @@
-package net.infoaccelerator.travel.kayak
+package net.infoaccelerator.travel.kayak.searches
 {
 	import mx.controls.Alert;
 	import mx.rpc.events.FaultEvent;
