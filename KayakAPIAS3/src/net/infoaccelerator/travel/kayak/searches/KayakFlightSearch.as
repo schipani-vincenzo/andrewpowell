@@ -48,7 +48,7 @@ package net.infoaccelerator.travel.kayak.searches
 		public var cabin			:String				= "";
 		
 		//Search Sort Parameters
-		public var resultCount		:Number				= 20;
+		public var resultCount		:Number				= 600;
 		public var filterMode		:String				= "normal";
 		public var filterAirline	:String				= "";
 		public var sortDirection	:String				= "up";
@@ -85,53 +85,53 @@ package net.infoaccelerator.travel.kayak.searches
 			
 			if(!intervalCheck){
 				flash.utils.clearInterval(_currentInterval);
-				loading = false;
-			}
 			
-			flightResults.searchID = _currentSearchID;
-			//flightResults.searchInstance = searchResult.searchinstance;
-			
-			var tripList:ArrayCollection 	= search.trips.trip as ArrayCollection;		
-			var tripLen:int 				= tripList.length;
-			for(var i:int=0; i<tripLen; i++){
-				var currentTrip:Trip 		= new Trip();
-				currentTrip.price.currency 	= tripList.getItemAt(i).price.currency;
-				currentTrip.price.url 		= "http://api.kayak.com" + tripList.getItemAt(i).price.url;
-				currentTrip.price.value 	= tripList.getItemAt(i).price.value;
-				var legList:ArrayCollection = tripList.getItemAt(i).legs.leg as ArrayCollection;
-				var legLen:int   			= legList.length;
-				for(var j:int=0; j<legLen; j++){
-					var currentLeg:Leg 				= new Leg();
-					currentLeg.airline 				= legList.getItemAt(j).airline;
-					currentLeg.airlineName 			= legList.getItemAt(j).airline_display;
-					currentLeg.arrive 				= parseStringToDate(legList.getItemAt(j).arrive); //parse date & time
-					currentLeg.cabin 				= legList.getItemAt(j).cabin;
-					currentLeg.depart 				= parseStringToDate(legList.getItemAt(j).depart); //parse date & time
-					currentLeg.destination 			= legList.getItemAt(j).dest;
-					currentLeg.mDuration 			= legList.getItemAt(j).duration_minutes;
-					currentLeg.origin 				= legList.getItemAt(j).orig;
-					currentLeg.stops 				= legList.getItemAt(j).stops
-					var segmentList:ArrayCollection = legList.getItemAt(j).segment as ArrayCollection;
-					var segmentLen:int 				= segmentList.length;
-					for(var k:int; k<segmentLen; k++){
-						var currentSegment:Segment 	= new Segment();
-						currentSegment.airline 		= segmentList.getItemAt(k).airline;
-						currentSegment.arrival 		= parseStringToDate(segmentList.getItemAt(k).at); //parse date & time
-						currentSegment.cabin   		= segmentList.getItemAt(k).cabin;
-						currentSegment.departure 	= parseStringToDate(segmentList.getItemAt(k).dt); //parse date & time
-						currentSegment.destination 	= segmentList.getItemAt(k).d;
-						currentSegment.equipment 	= segmentList.getItemAt(k).equip;
-						currentSegment.flight 		= segmentList.getItemAt(k).flight;
-						currentSegment.mDuration 	= segmentList.getItemAt(k).duration_minutes;
-						currentSegment.miles 		= segmentList.getItemAt(k).miles;
-						currentSegment.origin 		= segmentList.getItemAt(k).o;
-						currentLeg.segments.addItem(currentSegment);
+				flightResults.searchID = _currentSearchID;
+				//flightResults.searchInstance = searchResult.searchinstance;
+				
+				var tripList:ArrayCollection 	= search.trips.trip as ArrayCollection;		
+				var tripLen:int 				= tripList.length;
+				for(var i:int=0; i<tripLen; i++){
+					var currentTrip:Trip 		= new Trip();
+					currentTrip.price.currency 	= tripList.getItemAt(i).price.currency;
+					currentTrip.price.url 		= "http://api.kayak.com" + tripList.getItemAt(i).price.url;
+					currentTrip.price.value 	= new Number(tripList.getItemAt(i).price.value);
+					var legList:ArrayCollection = tripList.getItemAt(i).legs.leg as ArrayCollection;
+					var legLen:int   			= legList.length;
+					for(var j:int=0; j<legLen; j++){
+						var currentLeg:Leg 				= new Leg();
+						currentLeg.airline 				= legList.getItemAt(j).airline;
+						currentLeg.airlineName 			= legList.getItemAt(j).airline_display;
+						currentLeg.arrive 				= parseStringToDate(legList.getItemAt(j).arrive); //parse date & time
+						currentLeg.cabin 				= legList.getItemAt(j).cabin;
+						currentLeg.depart 				= parseStringToDate(legList.getItemAt(j).depart); //parse date & time
+						currentLeg.destination 			= legList.getItemAt(j).dest;
+						currentLeg.mDuration 			= legList.getItemAt(j).duration_minutes;
+						currentLeg.origin 				= legList.getItemAt(j).orig;
+						currentLeg.stops 				= legList.getItemAt(j).stops
+						var segmentList:ArrayCollection = legList.getItemAt(j).segment as ArrayCollection;
+						var segmentLen:int 				= segmentList.length;
+						for(var k:int; k<segmentLen; k++){
+							var currentSegment:Segment 	= new Segment();
+							currentSegment.airline 		= segmentList.getItemAt(k).airline;
+							currentSegment.arrival 		= parseStringToDate(segmentList.getItemAt(k).at); //parse date & time
+							currentSegment.cabin   		= segmentList.getItemAt(k).cabin;
+							currentSegment.departure 	= parseStringToDate(segmentList.getItemAt(k).dt); //parse date & time
+							currentSegment.destination 	= segmentList.getItemAt(k).d;
+							currentSegment.equipment 	= segmentList.getItemAt(k).equip;
+							currentSegment.flight 		= segmentList.getItemAt(k).flight;
+							currentSegment.mDuration 	= segmentList.getItemAt(k).duration_minutes;
+							currentSegment.miles 		= segmentList.getItemAt(k).miles;
+							currentSegment.origin 		= segmentList.getItemAt(k).o;
+							currentLeg.segments.addItem(currentSegment);
+						}
+						currentTrip.legs.addItem(currentLeg);
 					}
-					currentTrip.legs.addItem(currentLeg);
+					flightResults.trips.addItem(currentTrip);
 				}
-				flightResults.trips.addItem(currentTrip);
-			}
-			flightResults.count = flightResults.trips.length;			
+				flightResults.count = flightResults.trips.length;	
+				loading = false;
+			}		
 		}
 		
 				
