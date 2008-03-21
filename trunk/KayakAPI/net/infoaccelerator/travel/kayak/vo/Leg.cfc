@@ -8,7 +8,7 @@
 	<cfproperty name="stops" 		displayname="stops" 		type="numeric">
 	<cfproperty name="mDuration" 	displayname="mDuration" 	type="numeric">
 	<cfproperty name="cabin" 		displayname="cabin" 		type="string">
-	<cfproperty name="segments" 	displayname="segments" 		type="array">
+	<cfproperty name="segments" 	displayname="segments" 		type="net.infoaccelerator.travel.kayak.vo.Segment[]">
 	
 	<cfscript>
 		this.airline		=	"";
