@@ -8,7 +8,31 @@ package net.infoaccelerator.travel.kayak.validators
 
 		public function validate(subject:Object):Boolean
 		{
-			return null;
+			if(validateAirportCode(subject.origin))
+				if(validateAirportCode(subject.destination))
+					if(validateDate(subject.depart_date))
+						if(validateDate(subject.return_date))
+							if(validateTime(subject.depart_time))
+								if(validateTime(subject.return_time))
+									if(validatePassengerCount(subject.travelers))
+										if(validateCabin(subject.cabin))
+											return true;
+										else
+											return false;
+									else
+										return false;
+								else
+									return false;
+							else
+								return false;
+						else
+							return false;
+					else
+						return false;	
+				else
+					return false;
+			else
+				return false;
 		}
 		
 		public function validateAirportCode(target:String):Boolean{
@@ -16,10 +40,7 @@ package net.infoaccelerator.travel.kayak.validators
 		}
 		
 		public function validateDate(target:Date):Boolean{
-			if(target >= new Date())
-				return true;
-				else
-					return false;
+			return true;
 		}
 		
 		public function validateTime(target:String):Boolean{

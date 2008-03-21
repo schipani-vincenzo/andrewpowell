@@ -6,9 +6,9 @@ package net.infoaccelerator.travel.kayak.vo
 	public class Price
 	{
 
-		public var url:String = "";
-		public var currency:String = "";
-		public var value:String = "";
+		public var url		:String 		= "";
+		public var currency	:String 		= "";
+		public var value	:Number 		=  0;
 
 
 		public function Price()

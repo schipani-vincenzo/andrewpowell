@@ -8,7 +8,7 @@ package net.infoaccelerator.travel.kayak.vo
 	public class FlightSearchResult extends SearchResults
 	{
 
-		public var trips:ArrayCollection = null;
+		public var trips:ArrayCollection = new ArrayCollection();
 
 
 		public function FlightSearchResult()

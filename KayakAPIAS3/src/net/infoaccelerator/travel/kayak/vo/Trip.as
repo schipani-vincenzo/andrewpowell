@@ -1,13 +1,16 @@
 package net.infoaccelerator.travel.kayak.vo
 {
+	import mx.collections.ArrayCollection;
+	import net.infoaccelerator.travel.kayak.vo.Price;
+	
 	[RemoteClass(alias="net.infoaccelerator.travel.kayak.vo.Trip")]
 
 	[Bindable]
 	public class Trip
 	{
 
-		public var price:net.infoaccelerator.travel.kayak.vo.Price = null;
-		public var legs:ArrayCollection = null;
+		public var price:Price				= new Price();
+		public var legs	:ArrayCollection 	= new ArrayCollection();
 
 
 		public function Trip()
