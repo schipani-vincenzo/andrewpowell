@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
+	<mx:Script>
+		<![CDATA[
+	
+			import net.infoaccelerator.travel.kayak.searches.KayakHotelSearch;					
+					
+			private var _key:String = "Your Key Here";
+			[Bindable] private var hotelSearch:KayakHotelSearch = new KayakHotelSearch();
+						
+			public function onInitView(e:Event):void{
+				
+				hotelSearch.devKey = _key;
+				hotelSearch.checkin_date = new Date(2008,03,21);
+				hotelSearch.checkout_date = new Date(2008,3,23);
+				hotelSearch.city = "Atlanta, GA";
+				hotelSearch.filterMode = "normal";
+				hotelSearch.guests = 2;
+				hotelSearch.rooms = 1;
+				hotelSearch.sortDirection = "up";
+				hotelSearch.sortKey = "price";
+				hotelSearch.doSearch();
+				
+				
+			}					
+					
+			
+		]]>
+	</mx:Script>	
+	
+	<mx:Canvas>
+	</mx:Canvas>
+	<mx:DataGrid dataProvider="{hotelSearch.hotelResults.hotels}" y="36" x="10" width="620">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Price Range">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label text="{data.priceLow} to {data.priceHigh}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Name">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label text="{data.name}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Label text="Loading: {hotelSearch.loading}" x="10" y="10"/>
+</mx:Application>
