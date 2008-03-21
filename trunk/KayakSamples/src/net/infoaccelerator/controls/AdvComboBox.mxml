@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+		public function set value(val:Object) : void {
+	    if ( val != null ) {
+	    for (var i : int = 0; i < dataProvider.length; i++) {
+	    if ( val == dataProvider[i].data || val == dataProvider[i].label) {
+	    selectedIndex = i;
+	    return;
+	    } } }
+	    selectedIndex = -1;
+	    }
+	    
+		]]>
+	</mx:Script>	
+</mx:ComboBox>

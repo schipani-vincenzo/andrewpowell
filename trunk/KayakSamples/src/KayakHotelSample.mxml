@@ -1,52 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)" xmlns:controls="net.infoaccelerator.controls.*">
 	<mx:Script>
 		<![CDATA[
-	
-			import net.infoaccelerator.travel.kayak.searches.KayakHotelSearch;					
+			import com.mapquest.tilemap.pois.Poi;
+			import com.mapquest.PointLL;
+			import mx.collections.ArrayCollection;
+			import net.infoaccelerator.travel.kayak.events.SearchCompleteEvent;
+			
+			import mx.controls.Alert;
+			import mx.managers.CursorManager;
+			import mx.formatters.CurrencyFormatter;
+			
+			import net.infoaccelerator.travel.kayak.searches.KayakHotelSearch;	
+			
+			import com.mapquest.tilemap.controls.LargeZoomControl;
+  			import com.mapquest.tilemap.controls.ViewControl;				
 					
-			private var _key:String = "Your Key Here";
+			private var _key:String = "ELbI0KUodURBLn2_16Gh_A";
 			[Bindable] private var hotelSearch:KayakHotelSearch = new KayakHotelSearch();
+			
+			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6t2h072h%2C20%3Do5-gfy25";
 						
 			public function onInitView(e:Event):void{
 				
-				hotelSearch.devKey = _key;
-				hotelSearch.checkin_date = new Date(2008,03,21);
-				hotelSearch.checkout_date = new Date(2008,3,23);
-				hotelSearch.city = "Atlanta, GA";
-				hotelSearch.filterMode = "normal";
-				hotelSearch.guests = 2;
-				hotelSearch.rooms = 1;
-				hotelSearch.sortDirection = "up";
-				hotelSearch.sortKey = "price";
-				hotelSearch.doSearch();
+				hotelSearch.devKey 			= _key;
+				hotelSearch.checkin_date 	= new Date();
+				hotelSearch.checkout_date 	= new Date();
+				hotelSearch.city 			= "";
+				hotelSearch.filterMode 		= "normal";
+				hotelSearch.guests 			= 1;
+				hotelSearch.rooms 			= 1;
+				hotelSearch.sortDirection 	= "up";
+				hotelSearch.sortKey 		= "price";
+				hotelSearch.addEventListener("searchComplete",onSearchComplete);
+			
 				
+				this.map.addControl(new LargeZoomControl());
+	      		this.map.addControl(new ViewControl());
+			}
+			
+			private function onFilterModeChange(e:Event):void{
+				if(filterMode.value == "stars"){
+					this.starLabel.enabled 	= true;
+					this.stars.enabled 		= true;
+				}
+				else{
+					this.starLabel.enabled 	= false;
+					this.stars.enabled 		= false;
+				}
+			}
+			
+			private function onSearchBtnClick(e:Event):void{
+				if(!hotelSearch.loading){
+					hotelSearch.checkin_date = this.checkin_date.selectedDate;
+					hotelSearch.checkout_date = this.checkout_date.selectedDate;
+					hotelSearch.city = this.city.text;
+					hotelSearch.filterMode = this.filterMode.selectedItem as String;
+					hotelSearch.filterStars = this.stars.value;
+					hotelSearch.guests = this.guests.value as Number;
+					hotelSearch.rooms = this.rooms.value as Number;
+					hotelSearch.sortDirection = this.sortDirection.value as String;
+					hotelSearch.sortKey = this.sortKey.value as String;
+					CursorManager.setBusyCursor();
+					hotelSearch.doSearch();
+				}
+					else
+						Alert.show("Search In Progress.  Please Wait, then try again","Search In Progress");
+			}
+			
+			private function onSearchComplete(e:SearchCompleteEvent):void{
+				var hotels:ArrayCollection = hotelSearch.hotelResults.hotels;
+				var hotelLen:int 	= hotels.length;
+				for(var i:int=0;i<hotelLen;i++){
+					if(i==0){
+						var newCenter:PointLL = new PointLL(hotels.getItemAt(i).lat,hotels.getItemAt(i).lon);
+						this.map.setCenter(newCenter,6);
+						var poi:Poi = new Poi(newCenter);
+						poi.setInfoTitle(hotels.getItemAt(i).name);
+						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
+						poi.setKey("A"+i);
+						this.map.addPoi(poi);
+					}
+					else{
+						var newPoint:PointLL = new PointLL(hotels.getItemAt(i).lat,hotels.getItemAt(i).lon);
+						var poi:Poi = new Poi(newPoint);
+						poi.setInfoTitle(hotels.getItemAt(i).name);
+						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
+						poi.setKey("A"+i);
+						this.map.addPoi(poi);
+					}
+				}
+				CursorManager.removeBusyCursor();
+			}
+			
+			private function formatPrice(raw:Number):String{
+				var formatter:CurrencyFormatter = new CurrencyFormatter();
+				formatter.currencySymbol = "$";
+				formatter.alignSymbol = "left";
+				formatter.decimalSeparatorFrom = ".";
+				formatter.decimalSeparatorTo = ".";
 				
-			}					
+				return formatter.format(raw);
+			}
 					
 			
 		]]>
 	</mx:Script>	
 	
-	<mx:Canvas>
+	<mx:Canvas width="100%" height="100%">
+		<mx:Panel height="336" layout="absolute" id="kayakPanel" title="Kayak Search &amp; Sort Parameters" top="10" left="10" right="10">
+			<mx:VBox width="100%">
+			</mx:VBox>
+			<mx:HBox width="731" y="198" x="10">
+				<mx:Label text="Number of Guests: " id="guestLabel"/>
+				<controls:AdvComboBox width="52" id="guests" enabled="true">
+					<controls:dataProvider>
+						<mx:ArrayCollection>
+							<mx:Object label="1" data="1"/>
+							<mx:Object label="2" data="2"/>
+							<mx:Object label="3" data="3"/>
+							<mx:Object label="4" data="4"/>
+							<mx:Object label="5" data="5"/>
+							<mx:Object label="6" data="6"/>
+						</mx:ArrayCollection>
+					</controls:dataProvider>
+				</controls:AdvComboBox>
+				
+				<mx:Label text="Number of Rooms: " id="roomLabel"/>
+				<controls:AdvComboBox width="52" id="rooms" enabled="true">
+					<controls:dataProvider>
+						<mx:ArrayCollection>
+							<mx:Object label="1" data="1"/>
+							<mx:Object label="2" data="2"/>
+							<mx:Object label="3" data="3"/>
+						</mx:ArrayCollection>
+					</controls:dataProvider>
+				</controls:AdvComboBox>
+			</mx:HBox>
+			<mx:HBox width="731" y="10" x="10">
+				<mx:Label text="City: " id="citLbl"/>
+				<mx:TextInput id="city" enabled="true" cornerRadius="4" text="{hotelSearch.city}"/>
+				<mx:Label text="Check In:" id="inLabel"/>
+				<mx:DateChooser id="checkin_date" showToday="true"/>
+				<mx:Label text="Check Out:" id="outLabel"/>
+				<mx:DateChooser id="checkout_date" showToday="true"/>
+			</mx:HBox>
+			<mx:HBox x="10" y="228" width="731">
+				<mx:HRule width="100%"/>
+			</mx:HBox>
+			<mx:HBox x="10" y="238" width="731">
+				<mx:VBox width="110">
+					<mx:Label text="Filter Mode:"/>
+					<controls:AdvComboBox width="100" id="filterMode" enabled="true" change="onFilterModeChange(event)">
+						<controls:dataProvider>
+							<mx:ArrayCollection>
+								<mx:Object label="normal" data="normal"/>
+								<mx:Object label="stars" data="stars"/>
+							</mx:ArrayCollection>
+						</controls:dataProvider>
+					</controls:AdvComboBox>
+				</mx:VBox>
+				
+				<mx:VBox width="169">
+					<mx:Label text="Stars:" id="starLabel" enabled="false"/>
+					<mx:HSlider id="stars" allowTrackClick="true" minimum="1" maximum="5" snapInterval="1" enabled="false"/>
+				</mx:VBox>
+				
+				<mx:VBox width="84" visible="false">
+					<mx:Label text="Sort Direction:"/>
+					<controls:AdvComboBox width="75" id="sortDirection" enabled="true">
+						<controls:dataProvider>
+							<mx:ArrayCollection>
+								<mx:Object label="up" data="up"/>
+								<mx:Object label="down" data="down"/>
+							</mx:ArrayCollection>
+						</controls:dataProvider>
+					</controls:AdvComboBox>
+				</mx:VBox>
+				<mx:VBox width="84" visible="false">
+					<mx:Label text="Sort Key:"/>
+					<controls:AdvComboBox width="75" id="sortKey" enabled="true">
+						<controls:dataProvider>
+							<mx:ArrayCollection>
+								<mx:Object label="price" data="price"/>
+								<mx:Object label="stars" data="stars"/>
+								<mx:Object label="hotel" data="hotel"/>
+								<mx:Object label="distance" data="distance"/>
+							</mx:ArrayCollection>
+						</controls:dataProvider>
+					</controls:AdvComboBox>
+				</mx:VBox>
+				
+				<mx:Button label="Start Hotel Search" id="searchButton" click="onSearchBtnClick(event)"/>
+				
+			</mx:HBox>
+			
+			
+		</mx:Panel>
+		<mx:Panel height="425" layout="absolute" right="10" left="10" id="mapPanel" title="Search Results" y="357">
+
+			<mq:TilemapComponent id="map" key="{this._mapquestKey}" zoom="3" width="100%" height="100%" xmlns:mq="com.mapquest.tilemap.*"/>
+		</mx:Panel>
 	</mx:Canvas>
-	<mx:DataGrid dataProvider="{hotelSearch.hotelResults.hotels}" y="36" x="10" width="620">
-		<mx:columns>
-			<mx:DataGridColumn headerText="Price Range">
-				<mx:itemRenderer>
-					<mx:Component>
-						<mx:Label text="{data.priceLow} to {data.priceHigh}"/>
-					</mx:Component>
-				</mx:itemRenderer>
-			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Name">
-				<mx:itemRenderer>
-					<mx:Component>
-						<mx:Label text="{data.name}"/>
-					</mx:Component>
-				</mx:itemRenderer>
-			</mx:DataGridColumn>
-		</mx:columns>
-	</mx:DataGrid>
-	<mx:Label text="Loading: {hotelSearch.loading}" x="10" y="10"/>
 </mx:Application>

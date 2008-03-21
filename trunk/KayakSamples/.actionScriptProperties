@@ -9,6 +9,7 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
+    <application path="KayakHotelSample.mxml"/>
     <application path="KayakFlightSample.mxml"/>
   </applications>
   <modules/>
