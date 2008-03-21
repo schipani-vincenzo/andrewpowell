@@ -1,5 +1,7 @@
 package net.infoaccelerator.travel.kayak.vo
 {
+	import mx.collections.ArrayCollection;
+	
 	[RemoteClass(alias="net.infoaccelerator.travel.kayak.vo.Leg")]
 
 	[Bindable]
@@ -15,7 +17,7 @@ package net.infoaccelerator.travel.kayak.vo
 		public var stops:Number = 0;
 		public var mDuration:Number = 0;
 		public var cabin:String = "";
-		public var segments:ArrayCollection = null;
+		public var segments:ArrayCollection = new ArrayCollection();
 
 
 		public function Leg()
