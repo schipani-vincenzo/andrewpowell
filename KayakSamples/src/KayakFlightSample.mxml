@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
+	<mx:Script>
+		<![CDATA[
+						
+			import net.infoaccelerator.travel.kayak.searches.KayakFlightSearch;					
+					
+			private var _key:String = "Your Code Here";
+			
+			[Bindable] private var flightSearch:KayakFlightSearch = new KayakFlightSearch();
+						
+			public function onInitView(e:Event):void{
+				
+				flightSearch.devKey = _key;
+				flightSearch.depart_date = new Date(2008,4,20);
+				flightSearch.depart_time = "l";
+				flightSearch.destination = "DEN";
+				flightSearch.cabin = "f";
+				flightSearch.oneway = false;
+				flightSearch.origin = "ATL";
+				flightSearch.return_date = new Date(2008,4,22);
+				flightSearch.return_time = "l";
+				flightSearch.travelers = 1;
+				flightSearch.doSearch();
+
+			}					
+					
+			
+		]]>
+	</mx:Script>	
+	
+	<mx:Canvas>
+	</mx:Canvas>
+	<mx:DataGrid dataProvider="{flightSearch.flightResults.trips}" y="36" x="10" width="620">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Price">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label text="{data.price.value}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Legs">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:Label text="{data.legs.getItemAt(0).airline}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Label text="Loading: {flightSearch.loading}" x="10" y="10"/>
+</mx:Application>
