@@ -1,5 +1,6 @@
 package net.infoaccelerator.travel.kayak.searches
 {
+	import flash.events.EventDispatcher;
 	import flash.utils.*;
 	
 	import mx.collections.ArrayCollection;
@@ -8,6 +9,7 @@ package net.infoaccelerator.travel.kayak.searches
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
+	import net.infoaccelerator.travel.kayak.events.SearchCompleteEvent;
 	import net.infoaccelerator.travel.kayak.formatters.HotelSearchFormatter;
 	import net.infoaccelerator.travel.kayak.formatters.ISearchFormatter;
 	import net.infoaccelerator.travel.kayak.validators.HotelSearchValidator;
@@ -17,7 +19,8 @@ package net.infoaccelerator.travel.kayak.searches
 
 	
 	[Bindable]
-	public class KayakHotelSearch
+	[Event(name="searchComplete", type="net.infoaccelerator.travel.kayak.events.SearchCompleteEvent")]
+	public class KayakHotelSearch extends EventDispatcher
 	{
 		
 		private var _hotelSearchFormatter:ISearchFormatter = new HotelSearchFormatter();
@@ -106,6 +109,8 @@ package net.infoaccelerator.travel.kayak.searches
 					hotelResults.hotels.addItem(currentHotel);
 				}
 				hotelResults.count = hotelResults.hotels.length;	
+				
+				dispatchEvent(new SearchCompleteEvent(SearchCompleteEvent.EVENT_ID));
 			}		
 		}
 		
@@ -195,7 +200,7 @@ package net.infoaccelerator.travel.kayak.searches
 		url += "searchid="	+ searchID;
 		url += "&c="	   	+ resultCount;
 		if(filterMode != "normal")
-			url += "&m=" + filterMode + ":" + filterStars;
+			url += "&m=stars:" + filterStars;
 			else
 				url += "&m=normal";
 		url += "&d=" 		+ sortDirection;
