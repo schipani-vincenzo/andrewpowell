@@ -8,7 +8,7 @@ package net.infoaccelerator.travel.kayak.vo
 	public class HotelSearchResult extends SearchResults
 	{
 
-		public var hotels:ArrayCollection = null;
+		public var hotels:ArrayCollection = new ArrayCollection();
 
 
 		public function HotelSearchResult()
