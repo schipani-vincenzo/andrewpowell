@@ -18,10 +18,10 @@
 			import com.mapquest.tilemap.controls.LargeZoomControl;
   			import com.mapquest.tilemap.controls.ViewControl;				
 					
-			private var _key:String = "esm3gPbxTNuWHmfrb_7Azw";
+			private var _key:String = "YOUR KAYAK KEY";
 			[Bindable] private var hotelSearch:KayakHotelSearch = new KayakHotelSearch();
 			
-			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6y2l02ng%2Crw%3Do5-001a5";
+			[Bindable] private var _mapquestKey:String = "YOUR MQ KEY";
 						
 			public function onInitView(e:Event):void{
 				
