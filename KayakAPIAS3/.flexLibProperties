@@ -7,6 +7,7 @@
     <classEntry path="net.infoaccelerator.travel.kayak.vo.Hotel"/>
     <classEntry path="net.infoaccelerator.travel.kayak.vo.FlightSearchResult"/>
     <classEntry path="net.infoaccelerator.travel.kayak.searches.KayakHotelSearch"/>
+    <classEntry path="net.infoaccelerator.travel.kayak.events.AmbiguousLocationEvent"/>
     <classEntry path="net.infoaccelerator.travel.kayak.vo.Leg"/>
     <classEntry path="net.infoaccelerator.travel.kayak.vo.Price"/>
     <classEntry path="net.infoaccelerator.travel.kayak.vo.Airport"/>
@@ -14,6 +15,7 @@
     <classEntry path="net.infoaccelerator.travel.kayak.formatters.ISearchFormatter"/>
     <classEntry path="net.infoaccelerator.travel.kayak.validators.ISearchValidator"/>
     <classEntry path="net.infoaccelerator.travel.kayak.vo.Airline"/>
+    <classEntry path="net.infoaccelerator.travel.kayak.events.SearchFailureEvent"/>
     <classEntry path="net.infoaccelerator.travel.kayak.vo.HotelSearchResult"/>
     <classEntry path="net.infoaccelerator.travel.kayak.formatters.FlightSearchFormatter"/>
     <classEntry path="net.infoaccelerator.travel.kayak.events.SearchCompleteEvent"/>
