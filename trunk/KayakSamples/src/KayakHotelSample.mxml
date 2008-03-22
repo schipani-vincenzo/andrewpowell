@@ -2,6 +2,8 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)" xmlns:controls="net.infoaccelerator.controls.*">
 	<mx:Script>
 		<![CDATA[
+			import net.infoaccelerator.travel.kayak.events.AmbiguousLocationEvent;
+			import net.infoaccelerator.travel.kayak.events.SearchFailureEvent;
 			import com.mapquest.tilemap.pois.Poi;
 			import com.mapquest.PointLL;
 			import mx.collections.ArrayCollection;
@@ -16,10 +18,10 @@
 			import com.mapquest.tilemap.controls.LargeZoomControl;
   			import com.mapquest.tilemap.controls.ViewControl;				
 					
-			private var _key:String = "ELbI0KUodURBLn2_16Gh_A";
+			private var _key:String = "esm3gPbxTNuWHmfrb_7Azw";
 			[Bindable] private var hotelSearch:KayakHotelSearch = new KayakHotelSearch();
 			
-			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6t2h072h%2C20%3Do5-gfy25";
+			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6y2l02ng%2Crw%3Do5-001a5";
 						
 			public function onInitView(e:Event):void{
 				
@@ -33,6 +35,8 @@
 				hotelSearch.sortDirection 	= "up";
 				hotelSearch.sortKey 		= "price";
 				hotelSearch.addEventListener("searchComplete",onSearchComplete);
+				hotelSearch.addEventListener("searchFailure",onSearchFailure);
+				hotelSearch.addEventListener("ambiguousLoction",onAmbiguousLocation);
 			
 				
 				this.map.addControl(new LargeZoomControl());
@@ -74,7 +78,7 @@
 				for(var i:int=0;i<hotelLen;i++){
 					if(i==0){
 						var newCenter:PointLL = new PointLL(hotels.getItemAt(i).lat,hotels.getItemAt(i).lon);
-						this.map.setCenter(newCenter,6);
+						this.map.setCenter(newCenter,7);
 						var poi:Poi = new Poi(newCenter);
 						poi.setInfoTitle(hotels.getItemAt(i).name);
 						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
@@ -91,6 +95,24 @@
 					}
 				}
 				CursorManager.removeBusyCursor();
+			}
+			
+			private function onSearchFailure(e:SearchFailureEvent):void{
+				CursorManager.removeBusyCursor();
+				var errorString:String = "";
+				for(var i:int=0;i<e.errors.length;i++){
+					errorString += e.errors.getItemAt(i) + "\n";
+				}
+				Alert.show(errorString,"Search Error");
+			}
+			
+			private function onAmbiguousLocation(e:AmbiguousLocationEvent):void{
+				CursorManager.removeBusyCursor();
+				var locationString:String = "Location Suggestions: \n";
+				for(var i:int=0;i<e.suggestions.length;i++){
+					locationString += e.suggestions.getItemAt(i) + "\n";
+				}
+				Alert.show(locationString,"Ambiguous Location");
 			}
 			
 			private function formatPrice(raw:Number):String{
@@ -139,7 +161,7 @@
 			</mx:HBox>
 			<mx:HBox width="731" y="10" x="10">
 				<mx:Label text="City: " id="citLbl"/>
-				<mx:TextInput id="city" enabled="true" cornerRadius="4" text="{hotelSearch.city}"/>
+				<mx:TextInput id="city" enabled="true" cornerRadius="4" text="{hotelSearch.city}" toolTip="City, State (Atlanta, GA)"/>
 				<mx:Label text="Check In:" id="inLabel"/>
 				<mx:DateChooser id="checkin_date" showToday="true"/>
 				<mx:Label text="Check Out:" id="outLabel"/>
