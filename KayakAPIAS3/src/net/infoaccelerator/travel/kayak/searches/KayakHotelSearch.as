@@ -9,7 +9,9 @@ package net.infoaccelerator.travel.kayak.searches
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
+	import net.infoaccelerator.travel.kayak.events.AmbiguousLocationEvent;
 	import net.infoaccelerator.travel.kayak.events.SearchCompleteEvent;
+	import net.infoaccelerator.travel.kayak.events.SearchFailureEvent;
 	import net.infoaccelerator.travel.kayak.formatters.HotelSearchFormatter;
 	import net.infoaccelerator.travel.kayak.formatters.ISearchFormatter;
 	import net.infoaccelerator.travel.kayak.validators.HotelSearchValidator;
@@ -20,6 +22,8 @@ package net.infoaccelerator.travel.kayak.searches
 	
 	[Bindable]
 	[Event(name="searchComplete", type="net.infoaccelerator.travel.kayak.events.SearchCompleteEvent")]
+	[Event(name="searchFailure", type="net.infoaccelerator.travel.kayak.events.SearchFailureEvent")]
+	[Event(name="ambiguousLoction", type="net.infoaccelerator.travel.kayak.events.AmbiguousLocationEvent")]
 	public class KayakHotelSearch extends EventDispatcher
 	{
 		
@@ -69,11 +73,50 @@ package net.infoaccelerator.travel.kayak.searches
 		}				
 		
 		private function onInitialHotelSearchResult(e:ResultEvent):void{
+			if(e.result.error == null){
+			
 			_currentSearchID = e.result.search.searchid;
 			_currentHeaders  = e.headers;
 			
 			_currentInterval = flash.utils.setInterval(pollResults,5000,e.result.search.searchid,e.headers); 
-
+			}
+			else{
+				this.loading = false;
+				if(e.result.error.hotel_errors != null){
+					var errors:ArrayCollection = new ArrayCollection();
+					try{
+						if(e.result.error.hotel_errors.detail.source != null){
+							errors = e.result.error.hotel_errors.detail;
+						}
+					}
+					catch(exception:Error){
+						errors.addItem(e.result.error.hotel_errors.detail);
+					}
+					finally{
+						var failureEvent:SearchFailureEvent = new SearchFailureEvent(SearchFailureEvent.EVENT_ID,errors);
+						dispatchEvent(failureEvent);
+					}
+				}
+				
+				if(e.result.error.ambiguous_location != null){
+					var _locations:ArrayCollection = new ArrayCollection();
+					
+					for(var i:int=0;i<e.result.error.ambiguous_location.origin.length;i++){
+						_locations.addItem(e.result.error.ambiguous_location.origin.getItemAt(i));
+					}
+					
+					var ambiguousLocation:AmbiguousLocationEvent = new AmbiguousLocationEvent(AmbiguousLocationEvent.EVENT_ID,_locations);
+					dispatchEvent(ambiguousLocation);
+				}
+				
+				if(e.result.error.message != null){
+					var errors:ArrayCollection = new ArrayCollection();
+					errors.addItem(e.result.error.message);
+					var failureEvent:SearchFailureEvent = new SearchFailureEvent(SearchFailureEvent.EVENT_ID,errors);
+					dispatchEvent(failureEvent);
+				}
+				
+			}
 		}
 		
 		private function onPollResult(e:ResultEvent):void{
@@ -199,7 +242,7 @@ package net.infoaccelerator.travel.kayak.searches
 		
 		url += "searchid="	+ searchID;
 		url += "&c="	   	+ resultCount;
-		if(filterMode != "normal")
+		if(filterMode == "stars")
 			url += "&m=stars:" + filterStars;
 			else
 				url += "&m=normal";
