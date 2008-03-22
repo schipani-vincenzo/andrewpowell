@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			private var _hotels:ArrayCollection = new ArrayCollection();
+			
+			public function set hotels(hotels:ArrayCollection):void{
+				this.dataProvider = hotels;
+				this._hotels = hotels;
+			}
+			
+			public function get hotels():ArrayCollection{
+				return _hotels;
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:columns>
+		<mx:DataGridColumn dataField="name" headerText="Hotel"/>	
+		<mx:DataGridColumn dataField="phone" headerText="Phone"/>	
+	</mx:columns>
+</mx:DataGrid>

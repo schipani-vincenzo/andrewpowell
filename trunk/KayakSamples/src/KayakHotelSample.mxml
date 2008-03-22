@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)" xmlns:controls="net.infoaccelerator.controls.*">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
 	<mx:Script>
 		<![CDATA[
+			import com.mapquest.tilemap.pois.PoiCollection;
+			import net.infoaccelerator.travel.kayak.vo.Hotel;
 			import net.infoaccelerator.travel.kayak.events.AmbiguousLocationEvent;
 			import net.infoaccelerator.travel.kayak.events.SearchFailureEvent;
 			import com.mapquest.tilemap.pois.Poi;
@@ -18,7 +20,7 @@
 			import com.mapquest.tilemap.controls.LargeZoomControl;
   			import com.mapquest.tilemap.controls.ViewControl;				
 					
-			private var _key:String = "YOUR KAYAK KEY";
+			private var _key:String = "YOUR Kayak KEY";
 			[Bindable] private var hotelSearch:KayakHotelSearch = new KayakHotelSearch();
 			
 			[Bindable] private var _mapquestKey:String = "YOUR MQ KEY";
@@ -82,7 +84,7 @@
 						var poi:Poi = new Poi(newCenter);
 						poi.setInfoTitle(hotels.getItemAt(i).name);
 						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
-						poi.setKey("A"+i);
+						poi.setKey(hotels.getItemAt(i).id);
 						this.map.addPoi(poi);
 					}
 					else{
@@ -90,7 +92,7 @@
 						var poi:Poi = new Poi(newPoint);
 						poi.setInfoTitle(hotels.getItemAt(i).name);
 						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
-						poi.setKey("A"+i);
+						poi.setKey(hotels.getItemAt(i).id);
 						this.map.addPoi(poi);
 					}
 				}
@@ -115,6 +117,20 @@
 				Alert.show(locationString,"Ambiguous Location");
 			}
 			
+			private function onHotelGridClick(e:MouseEvent):void{
+				var currentHotel:Hotel = hotelGrid.selectedItem as Hotel;
+				var poiArray:PoiCollection = this.map.getPois();
+				var poiLen:int = poiArray.length;
+				for(var i:int=0;i<poiLen;i++){
+					var currentPOI:Poi = poiArray.get(i);
+					if(currentPOI.getKey() == currentHotel.id.toString()){
+						var newCenter:PointLL = new PointLL(new Number(currentHotel.lat), new Number(currentHotel.lon));
+						this.map.setCenter(newCenter,9);
+						break;
+					}
+				}
+			}
+			
 			private function formatPrice(raw:Number):String{
 				var formatter:CurrencyFormatter = new CurrencyFormatter();
 				formatter.currencySymbol = "$";
@@ -131,11 +147,9 @@
 	
 	<mx:Canvas width="100%" height="100%">
 		<mx:Panel height="336" layout="absolute" id="kayakPanel" title="Kayak Search &amp; Sort Parameters" top="10" left="10" right="10">
-			<mx:VBox width="100%">
-			</mx:VBox>
 			<mx:HBox width="731" y="198" x="10">
 				<mx:Label text="Number of Guests: " id="guestLabel"/>
-				<controls:AdvComboBox width="52" id="guests" enabled="true">
+				<controls:AdvComboBox width="52" id="guests" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
 					<controls:dataProvider>
 						<mx:ArrayCollection>
 							<mx:Object label="1" data="1"/>
@@ -149,7 +163,7 @@
 				</controls:AdvComboBox>
 				
 				<mx:Label text="Number of Rooms: " id="roomLabel"/>
-				<controls:AdvComboBox width="52" id="rooms" enabled="true">
+				<controls:AdvComboBox width="52" id="rooms" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
 					<controls:dataProvider>
 						<mx:ArrayCollection>
 							<mx:Object label="1" data="1"/>
@@ -173,7 +187,7 @@
 			<mx:HBox x="10" y="238" width="731">
 				<mx:VBox width="110">
 					<mx:Label text="Filter Mode:"/>
-					<controls:AdvComboBox width="100" id="filterMode" enabled="true" change="onFilterModeChange(event)">
+					<controls:AdvComboBox width="100" id="filterMode" enabled="true" change="onFilterModeChange(event)"  xmlns:controls="net.infoaccelerator.controls.*">
 						<controls:dataProvider>
 							<mx:ArrayCollection>
 								<mx:Object label="normal" data="normal"/>
@@ -190,7 +204,7 @@
 				
 				<mx:VBox width="84" visible="false">
 					<mx:Label text="Sort Direction:"/>
-					<controls:AdvComboBox width="75" id="sortDirection" enabled="true">
+					<controls:AdvComboBox width="75" id="sortDirection" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
 						<controls:dataProvider>
 							<mx:ArrayCollection>
 								<mx:Object label="up" data="up"/>
@@ -201,7 +215,7 @@
 				</mx:VBox>
 				<mx:VBox width="84" visible="false">
 					<mx:Label text="Sort Key:"/>
-					<controls:AdvComboBox width="75" id="sortKey" enabled="true">
+					<controls:AdvComboBox width="75" id="sortKey" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
 						<controls:dataProvider>
 							<mx:ArrayCollection>
 								<mx:Object label="price" data="price"/>
@@ -216,11 +230,15 @@
 				<mx:Button label="Start Hotel Search" id="searchButton" click="onSearchBtnClick(event)"/>
 				
 			</mx:HBox>
+			<mx:Panel y="10" width="350" height="274" layout="absolute" id="resultPanel" title="Hotels Found: {hotelSearch.hotelResults.count}" x="749">
+				<controls:hotelGrid id="hotelGrid" hotels="{hotelSearch.hotelResults.hotels}" click="onHotelGridClick(event)"  xmlns:controls="net.infoaccelerator.controls.*"/>
+			</mx:Panel>
+			
+			
 			
 			
 		</mx:Panel>
 		<mx:Panel height="425" layout="absolute" right="10" left="10" id="mapPanel" title="Search Results" y="357">
-
 			<mq:TilemapComponent id="map" key="{this._mapquestKey}" zoom="3" width="100%" height="100%" xmlns:mq="com.mapquest.tilemap.*"/>
 		</mx:Panel>
 	</mx:Canvas>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel width="350" height="274" layout="absolute">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			private var _hotels:ArrayCollection = new ArrayCollection();
+			
+			public function set hotels(hotels:ArrayCollection):void{
+				this._hotels = hotels;
+				this.hotelGrid.hotels = _hotels;
+				this.title = "Hotels Found: " & _hotels.length.toString();
+			}
+			
+			public function get hotels():ArrayCollection{
+				return _hotels;
+			}
+			
+		]]>
+	</mx:Script>
+
+	<controls:hotelGrid id="hotelGrid" hotels="{hotelSearch.hotelResults.hotels}" click="onHotelGridClick(event)" xmlns:controls="net.infoaccelerator.controls.*"/>
+</mx:Panel>
