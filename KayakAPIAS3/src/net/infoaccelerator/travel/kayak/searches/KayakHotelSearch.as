@@ -63,6 +63,7 @@ package net.infoaccelerator.travel.kayak.searches
 				
 				
 		public function doSearch():void{
+			var hotelResults:HotelSearchResult = new HotelSearchResult();
 			startSearchProcess(devKey);
 			loading = true;					
 		}				
