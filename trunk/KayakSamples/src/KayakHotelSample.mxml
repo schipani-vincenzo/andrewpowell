@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
+	<mx:states>
+		<mx:State name="ResultDetail">
+			<mx:SetProperty target="{mapPanel}" name="height" value="428"/>
+			<mx:SetProperty target="{mapPanel}" name="y"/>
+			<mx:SetProperty target="{mapPanel}" name="width" value="49%"/>
+			<mx:SetStyle target="{mapPanel}" name="right"/>
+			<mx:SetProperty target="{detailPanel}" name="y"/>
+			<mx:SetStyle target="{detailPanel}" name="left"/>
+			<mx:SetProperty target="{detailPanel}" name="width" value="49%"/>
+			<mx:SetStyle target="{detailPanel}" name="right" value="10"/>
+			<mx:SetStyle target="{mapPanel}" name="left" value="10"/>
+			<mx:SetStyle target="{mapPanel}" name="bottom" value="-277"/>
+			<mx:SetStyle target="{detailPanel}" name="bottom" value="-274"/>
+			<mx:SetProperty target="{detailPanel}" name="height" value="428"/>
+		</mx:State>
+	</mx:states>
 	<mx:Script>
 		<![CDATA[
 			import net.infoaccelerator.travel.kayak.vo.HotelSearchResult;
@@ -21,10 +37,10 @@
 			import com.mapquest.tilemap.controls.LargeZoomControl;
   			import com.mapquest.tilemap.controls.ViewControl;				
 					
-			private var _key:String = "Your Kayak Key";
+			private var _key:String = "esm3gPbxTNuWHmfrb_7Azw";
 			[Bindable] private var hotelSearch:KayakHotelSearch = new KayakHotelSearch();
 			
-			[Bindable] private var _mapquestKey:String = "Your MQ Key";
+			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6y2l02ng%2Crw%3Do5-001a5";
 						
 			public function onInitView(e:Event):void{
 				
@@ -128,9 +144,9 @@
 				var poiLen:int = poiArray.length;
 				for(var i:int=0;i<poiLen;i++){
 					var currentPOI:Poi = poiArray.get(i);
-					if(currentPOI.getKey() == currentHotel.id.toString()){
+					if(currentHotel != null && (currentPOI.getKey() == currentHotel.id.toString())){
 						var newCenter:PointLL = new PointLL(new Number(currentHotel.lat), new Number(currentHotel.lon));
-						this.map.setCenter(newCenter,9);
+						this.map.setCenter(newCenter,11);
 						break;
 					}
 				}
@@ -151,8 +167,8 @@
 	</mx:Script>	
 	
 	<mx:Canvas width="100%" height="100%">
-		<mx:Panel height="336" layout="absolute" id="kayakPanel" title="Kayak Search &amp; Sort Parameters" top="10" left="10" right="10">
-			<mx:HBox width="731" y="198" x="10">
+		<mx:Panel height="49%" layout="absolute" id="kayakPanel" title="Kayak Search &amp; Sort Parameters" top="10" left="10" right="10">
+			<mx:HBox width="100%" y="198" x="10">
 				<mx:Label text="Number of Guests: " id="guestLabel"/>
 				<controls:AdvComboBox width="52" id="guests" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
 					<controls:dataProvider>
@@ -240,8 +256,11 @@
 			</mx:Panel>
 
 		</mx:Panel>
-		<mx:Panel height="425" layout="absolute" right="10" left="10" id="mapPanel" title="Search Results" y="357">
+		<mx:Panel height="48%" layout="absolute" left="10" width="49%" id="mapPanel" title="Search Results" bottom="10" >
 			<mq:TilemapComponent id="map" key="{this._mapquestKey}" zoom="3" width="100%" height="100%" xmlns:mq="com.mapquest.tilemap.*"/>
+		</mx:Panel>
+		<mx:Panel height="48%" layout="absolute" width="49%" right="10" id="detailPanel" title="Hotel Detail" bottom="10">
+			
 		</mx:Panel>
 	</mx:Canvas>
 </mx:Application>
