@@ -11,7 +11,6 @@ package net.infoaccelerator.travel.kayak.searches
 	
 	import net.infoaccelerator.travel.kayak.events.SearchCompleteEvent;
 	import net.infoaccelerator.travel.kayak.events.SearchFailureEvent;
-	
 	import net.infoaccelerator.travel.kayak.formatters.FlightSearchFormatter;
 	import net.infoaccelerator.travel.kayak.formatters.ISearchFormatter;
 	import net.infoaccelerator.travel.kayak.validators.FlightSearchValidator;
@@ -101,9 +100,9 @@ package net.infoaccelerator.travel.kayak.searches
 				}
 				
 				if(e.result.error.message != null){
-					var errors:ArrayCollection = new ArrayCollection();
-					errors.addItem(e.result.error.message);
-					var failureEvent:SearchFailureEvent = new SearchFailureEvent(SearchFailureEvent.EVENT_ID,errors);
+					var _errors:ArrayCollection = new ArrayCollection();
+					_errors.addItem(e.result.error.message);
+					var failureEvent:SearchFailureEvent = new SearchFailureEvent(SearchFailureEvent.EVENT_ID,_errors);
 					dispatchEvent(failureEvent);
 				}
 				
@@ -202,7 +201,6 @@ package net.infoaccelerator.travel.kayak.searches
 			
 			sessionService.send(params);
 					
-			
 		}
 		
 		private function doInitialFlightSearch(headers:Object):void{
@@ -253,7 +251,9 @@ package net.infoaccelerator.travel.kayak.searches
 				searchService.send();
 			}
 			else{
-				Alert.show("Validation Failed","Kayak API Error");
+				var errors:ArrayCollection = new ArrayCollection();
+				errors.addItem("Validation Failed");
+				var failureEvent:SearchFailureEvent = new SearchFailureEvent(SearchFailureEvent.EVENT_ID,errors);
 			}
 		}
 		
