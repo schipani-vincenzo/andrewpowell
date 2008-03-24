@@ -153,7 +153,7 @@ package net.infoaccelerator.travel.kayak.searches
 					hotelResults.hotels.addItem(currentHotel);
 				}
 				hotelResults.count = hotelResults.hotels.length;	
-				
+				loading = false;
 				dispatchEvent(new SearchCompleteEvent(SearchCompleteEvent.EVENT_ID));
 			}		
 		}

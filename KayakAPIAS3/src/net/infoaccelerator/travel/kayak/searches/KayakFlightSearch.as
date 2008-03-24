@@ -9,6 +9,9 @@ package net.infoaccelerator.travel.kayak.searches
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
+	import net.infoaccelerator.travel.kayak.events.SearchCompleteEvent;
+	import net.infoaccelerator.travel.kayak.events.SearchFailureEvent;
+	
 	import net.infoaccelerator.travel.kayak.formatters.FlightSearchFormatter;
 	import net.infoaccelerator.travel.kayak.formatters.ISearchFormatter;
 	import net.infoaccelerator.travel.kayak.validators.FlightSearchValidator;
@@ -19,6 +22,8 @@ package net.infoaccelerator.travel.kayak.searches
 	import net.infoaccelerator.travel.kayak.vo.Trip;
 	
 	[Bindable]
+	[Event(name="searchComplete", type="net.infoaccelerator.travel.kayak.events.SearchCompleteEvent")]
+	[Event(name="searchFailure", type="net.infoaccelerator.travel.kayak.events.SearchFailureEvent")]
 	public class KayakFlightSearch
 	{
 		
@@ -70,10 +75,39 @@ package net.infoaccelerator.travel.kayak.searches
 		}				
 		
 		private function onInitialFlightSearchResult(e:ResultEvent):void{
+			if(e.result.error == null){
+			
 			_currentSearchID = e.result.search.searchid;
 			_currentHeaders  = e.headers;
 			
 			_currentInterval = flash.utils.setInterval(pollResults,5000,e.result.search.searchid,e.headers); 
+			}
+			else{
+				this.loading = false;
+				if(e.result.error.flight_errors != null){
+					var errors:ArrayCollection = new ArrayCollection();
+					try{
+						if(e.result.error.hotel_errors.detail.source != null){
+							errors = e.result.error.flight_errors.detail;
+						}
+					}
+					catch(exception:Error){
+						errors.addItem(e.result.error.flight_errors.detail);
+					}
+					finally{
+						var failureEvent:SearchFailureEvent = new SearchFailureEvent(SearchFailureEvent.EVENT_ID,errors);
+						dispatchEvent(failureEvent);
+					}
+				}
+				
+				if(e.result.error.message != null){
+					var errors:ArrayCollection = new ArrayCollection();
+					errors.addItem(e.result.error.message);
+					var failureEvent:SearchFailureEvent = new SearchFailureEvent(SearchFailureEvent.EVENT_ID,errors);
+					dispatchEvent(failureEvent);
+				}
+				
+			}
 
 		}
 		
@@ -131,6 +165,7 @@ package net.infoaccelerator.travel.kayak.searches
 				}
 				flightResults.count = flightResults.trips.length;	
 				loading = false;
+				dispatchEvent(new SearchCompleteEvent(SearchCompleteEvent.EVENT_ID));
 			}		
 		}
 		
