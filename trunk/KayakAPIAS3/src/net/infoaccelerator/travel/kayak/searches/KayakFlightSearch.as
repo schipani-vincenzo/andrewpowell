@@ -142,7 +142,14 @@ package net.infoaccelerator.travel.kayak.searches
 						currentLeg.mDuration 			= legList.getItemAt(j).duration_minutes;
 						currentLeg.origin 				= legList.getItemAt(j).orig;
 						currentLeg.stops 				= legList.getItemAt(j).stops
-						var segmentList:ArrayCollection = legList.getItemAt(j).segment as ArrayCollection;
+						if(legList.getItemAt(j).segment instanceof ArrayCollection){
+							var segmentList:ArrayCollection = legList.getItemAt(j).segment as ArrayCollection;
+						}
+							else{
+								var segment:Object = legList.getItemAt(j).segment;
+								var segmentList:ArrayCollection = new ArrayCollection();
+								segmentList.addItem(segment);
+							}
 						var segmentLen:int 				= segmentList.length;
 						for(var k:int; k<segmentLen; k++){
 							var currentSegment:Segment 	= new Segment();
