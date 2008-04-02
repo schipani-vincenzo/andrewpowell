@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.formatters.CurrencyFormatter;
+			import net.infoaccelerator.travel.kayak.vo.Hotel;
+			
+			[Bindable] public var hotel:Hotel;
+			
+			private function onCallClick(e:MouseEvent):void{
+			
+			}
+			
+			private function formatPrice(raw:Number):String{
+				var formatter:CurrencyFormatter = new CurrencyFormatter();
+				formatter.currencySymbol = "$";
+				formatter.alignSymbol = "left";
+				formatter.decimalSeparatorFrom = ".";
+				formatter.decimalSeparatorTo = ".";
+				
+				return formatter.format(raw);
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:VBox width="100%" height="100%">
+		<mx:Label id="starsLabel" text="Stars: {hotel.stars}"/>
+		<mx:Label id="phoneLabel" text="Phone: {hotel.phone}"/>
+		<mx:Label id="priceLabel" text="Price Range: {formatPrice(hotel.priceLow)} to {formatPrice(hotel.priceHigh)}"/>
+		<mx:Button id="callButton" label="Call Hotel" click="onCallClick(event)"/>	
+	</mx:VBox>
+</mx:Canvas>

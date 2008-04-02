@@ -2,6 +2,8 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
 	<mx:Script>
 		<![CDATA[
+			import mx.events.ValidationResultEvent;
+			import mx.validators.PhoneNumberValidator;
 			import com.mapquest.tilemap.pois.PoiEvent;
 			import net.infoaccelerator.travel.kayak.vo.HotelSearchResult;
 			import com.mapquest.tilemap.pois.PoiCollection;
@@ -16,6 +18,7 @@
 			import mx.controls.Alert;
 			import mx.managers.CursorManager;
 			import mx.formatters.CurrencyFormatter;
+			import mx.formatters.PhoneFormatter;
 			
 			import net.infoaccelerator.travel.kayak.searches.KayakHotelSearch;	
 			import net.infoaccelerator.assets.SearchAssets;
@@ -81,9 +84,11 @@
 						Alert.show("Search In Progress.  Please Wait, then try again","Search In Progress");
 			}
 			
+			
 			private function onSearchComplete(e:SearchCompleteEvent):void{
 				var hotels:ArrayCollection = hotelSearch.hotelResults.hotels;
 				var hotelLen:int 	= hotels.length;
+							
 				for(var i:int=0;i<hotelLen;i++){
 					if(i==0){
 						var newCenter:PointLL = new PointLL(hotels.getItemAt(i).lat,hotels.getItemAt(i).lon);
@@ -160,6 +165,25 @@
 				formatter.decimalSeparatorFrom = ".";
 				formatter.decimalSeparatorTo = ".";
 				return formatter.format(raw);
+			}
+			
+			private function formatPhoneNumber(raw:String):String{
+				var formatter:PhoneFormatter = new PhoneFormatter();
+				var validator:PhoneNumberValidator = new PhoneNumberValidator();
+				formatter.areaCodeFormat = "###";
+				formatter.formatString = "###-###-####";
+				formatter.validPatternChars = "#-() /";
+				
+				validator.property="text";
+				validator.allowedFormatChars = "";
+				validator.source = raw;
+				
+				var vResult:ValidationResultEvent = validator.validate();
+				if (vResult.type==ValidationResultEvent.VALID)
+					return formatter.format(raw);
+				else
+					return "";
+				
 			}
 					
 			
