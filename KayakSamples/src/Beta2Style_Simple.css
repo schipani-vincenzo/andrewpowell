@@ -1,0 +1,36 @@
+/* CSS file */
+
+global
+{
+	backgroundGradientAlphas: 1.0, 1.0;
+	backgroundGradientColors: #167300, #000000;
+}
+Panel
+{
+	borderColor: #CCCCCC;
+	disabledColor: #CCCCCC;
+	color: #000000;
+}
+Panel.inner
+{
+	borderColor: #167300;
+	disabledColor: #CCCCCC;
+	color: #000000;
+	borderAlpha: 0.7;
+	roundedBottomCorners: true;
+}
+Button.go
+{
+	borderColor: #0C7B00;
+	themeColor: #0C7B00;
+}
+Button.end
+{
+	borderColor: #A00000;
+	themeColor: #A00000;
+}
+Button.alt
+{
+	borderColor: #F28E00;
+	themeColor: #F28E00;
+}

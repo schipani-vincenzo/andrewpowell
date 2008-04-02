@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onInitView(event)">
+
+	
+	
+	<ribbit:RibbitRequest id="request"
+		loggingIn="loggingStatus.text='Logging In To Ribbit VOIP';" 
+		ribbitServerConnected="handleServerConnected()"		 
+		incomingCall="handleIncomingCall(event.data as CallObject)" 
+		callRinging="handleCallRinging()" 
+		callConnected="handleCallConnected(event.data as CallObject)"  
+		callDisconnected="handleCallDisconnected(event.data as CallObject)" 
+		callHungup="handleCallHungup(event.data as CallObject)" 
+		error="trace(event.data);" 
+		callerFound="handleRibbitUser(event.data as RibbitUser)"
+		xmlns:ribbit="com.ribbit.api.*"/>
+
+
+
+	<mx:Script>
+		<![CDATA[			
+			//import ribbit phone classes
+				import com.ribbit.api.objects.CallObject;
+				import com.ribbit.api.objects.RibbitUser;
+				import com.ribbit.api.connections.Globals;
+				
+				
+			//delcare vars
+				private var _incomingCall:CallObject;
+				private var _activeCall:CallObject;
+				public var out:String;
+				[Bindable] public  var numberToCall:String;
+				[Bindable] public  var panelTitle:String;
+				[Bindable] private var inCall:Boolean;
+			
+			private function onInitView(e:Event):void{
+				login('andrew.powell@universalmind.com','580pg3');
+			}
+			
+			/**
+			 * calls login() when login button is clicked
+			 */			
+			private function login(username:String,password:String):void {
+				request.login(username, password, '', '');
+			}
+			
+			/**
+			 * calls makeCall() when Call button is clicked
+			 */
+			private function makeCall():void {
+				request.makeCall(number.text); 
+				inCall=true;
+				callStatus.text = 'dialing';
+				hangUpButton.enabled=true;
+			}
+			
+			/**
+			 * event handler for ribbitServerConnected, sent from RibbitReuqest Object
+			 */			
+			private function handleServerConnected():void {
+				callButton.enabled = true;
+				loggingStatus.text='Connected To VOIP Service';
+			}
+			
+			/**
+			 * event handler for _incomingCall, sent from RibbitReuqest Object
+			 */					
+			private function handleIncomingCall(call:CallObject):void {
+			}	
+
+			/**
+			 * calls answerCall() when answerCall button is clicked
+			 */				
+			private function answerCall():void {
+				_activeCall = _incomingCall;
+				
+				request.answerCall(_activeCall); 
+				
+
+				hangUpButton.enabled=true;
+
+				
+				inCall=true;
+			}
+
+			/**
+			 * event handler for callRinging, sent from RibbitReuqest Object
+			 */		
+			private function handleCallRinging():void {
+				callButton.enabled=false;
+				callStatus.text = 'ringing';
+			}
+
+			/**
+			 * event handler for callConnected, sent from RibbitReuqest Object
+			 */				
+			private function handleCallConnected(call:CallObject):void {								
+				_activeCall = call;
+				
+				//trace("***** " + _activeCall.callID + " " + _activeCall.status);
+				
+				callButton.enabled=false; 
+				hangUpButton.enabled=true; 
+				
+				
+				callStatus.text = 'connected';
+			}
+			
+			/**
+			 * event handler for callDisconnected, sent from RibbitReuqest Object
+			 */				
+			private function handleCallDisconnected(disconnectedCall:CallObject):void {
+				
+				//trace("***** " + disconnectedCall.callID + " " + disconnectedCall.status);
+				
+				_activeCall = new CallObject();
+				
+				callStatus.text = 'ended';
+			}			
+
+			/**
+			 * event handler for callHungup, sent from RibbitReuqest Object
+			 */				
+			private function handleCallHungup(hangingUpCall:CallObject):void {
+				
+				//trace("***** " + hangingUpCall.callID + " " + hangingUpCall.status);
+				
+				callButton.enabled=true; 
+				hangUpButton.enabled=false; 
+
+				
+				callStatus.text = 'hungup';
+				inCall=false;
+			}
+			
+			private function handleRibbitUser(user:RibbitUser):void {
+				//trace(user.ismember);
+			}								
+			
+		]]>
+	</mx:Script>
+		
+	<mx:Panel width="100%" height="100%" layout="absolute" title="{panelTitle}" borderColor="#CCCCCC">
+		<mx:VBox >
+			<mx:Label text="" id="loggingStatus"/>
+			<mx:HBox>
+				<mx:Label text="Number to Call:" />
+				<mx:TextInput text="{numberToCall}" editable="false" id="number" />				
+			</mx:HBox>
+			<mx:HBox>
+				<mx:Button id="callButton" label="Call" click="makeCall();" enabled="false"  width="80" styleName="go"/>
+				<mx:Label id="callStatus" text="" />
+				<mx:Button id="hangUpButton" label="Hang Up" click="{request.hangup(_activeCall);}" enabled="false" width="80" styleName="end"/>
+			</mx:HBox>
+			
+		</mx:VBox>
+		
+	</mx:Panel>
+	
+	
+
+</mx:Canvas>

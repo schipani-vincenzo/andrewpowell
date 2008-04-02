@@ -2,17 +2,45 @@
 <mx:DataGrid xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
 	<mx:Script>
 		<![CDATA[
+			import net.infoaccelerator.travel.kayak.vo.Hotel;
+			import mx.events.ValidationResultEvent;
+			import mx.validators.PhoneNumberValidator;
+			import mx.formatters.PhoneFormatter;
 			import mx.collections.ArrayCollection;
 			
 			private var _hotels:ArrayCollection = new ArrayCollection();
 			
 			public function set hotels(hotels:ArrayCollection):void{
+				var hotelCnt:int = hotels.length;
+				for(var i:int=0;i<hotelCnt;i++){
+					var cHotel:Hotel = hotels.getItemAt(i) as Hotel;
+					cHotel.phone = formatPhoneNumber(cHotel.phone);
+				}
 				this.dataProvider = hotels;
 				this._hotels = hotels;
 			}
 			
 			public function get hotels():ArrayCollection{
 				return _hotels;
+			}
+			
+			private function formatPhoneNumber(raw:String):String{
+				var formatter:PhoneFormatter = new PhoneFormatter();
+				var validator:PhoneNumberValidator = new PhoneNumberValidator();
+				formatter.areaCodeFormat = "###";
+				formatter.formatString = "###-###-####";
+				formatter.validPatternChars = "#-() /";
+				
+				validator.property="text";
+				validator.allowedFormatChars = "";
+				validator.source = raw;
+				
+				var vResult:ValidationResultEvent = validator.validate();
+				if (vResult.type==ValidationResultEvent.VALID)
+					return formatter.format(raw);
+				else
+					return "";
+				
 			}
 			
 		]]>
