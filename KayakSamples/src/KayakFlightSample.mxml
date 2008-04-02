@@ -5,22 +5,25 @@
 						
 			import net.infoaccelerator.travel.kayak.searches.KayakFlightSearch;					
 					
-			private var _key:String = "Your Code Here";
+			private var _key:String = "esm3gPbxTNuWHmfrb_7Azw";
 			
 			[Bindable] private var flightSearch:KayakFlightSearch = new KayakFlightSearch();
 						
 			public function onInitView(e:Event):void{
 				
 				flightSearch.devKey = _key;
-				flightSearch.depart_date = new Date(2008,4,20);
-				flightSearch.depart_time = "l";
+				flightSearch.depart_date = new Date(2008,5,3);
+				flightSearch.depart_time = "a";
 				flightSearch.destination = "DEN";
-				flightSearch.cabin = "f";
+				flightSearch.cabin = "e";
 				flightSearch.oneway = false;
 				flightSearch.origin = "ATL";
-				flightSearch.return_date = new Date(2008,4,22);
-				flightSearch.return_time = "l";
+				flightSearch.return_date = new Date(2008,5,10);
+				flightSearch.return_time = "a";
 				flightSearch.travelers = 1;
+				flightSearch.filterMode = "normal";
+				flightSearch.sortDirection = "up";
+				flightSearch.sortKey = "price";
 				flightSearch.doSearch();
 
 			}					

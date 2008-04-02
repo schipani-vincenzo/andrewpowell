@@ -1,23 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
-	<mx:states>
-		<mx:State name="ResultDetail">
-			<mx:SetProperty target="{mapPanel}" name="height" value="428"/>
-			<mx:SetProperty target="{mapPanel}" name="y"/>
-			<mx:SetProperty target="{mapPanel}" name="width" value="49%"/>
-			<mx:SetStyle target="{mapPanel}" name="right"/>
-			<mx:SetProperty target="{detailPanel}" name="y"/>
-			<mx:SetStyle target="{detailPanel}" name="left"/>
-			<mx:SetProperty target="{detailPanel}" name="width" value="49%"/>
-			<mx:SetStyle target="{detailPanel}" name="right" value="10"/>
-			<mx:SetStyle target="{mapPanel}" name="left" value="10"/>
-			<mx:SetStyle target="{mapPanel}" name="bottom" value="-277"/>
-			<mx:SetStyle target="{detailPanel}" name="bottom" value="-274"/>
-			<mx:SetProperty target="{detailPanel}" name="height" value="428"/>
-		</mx:State>
-	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import com.mapquest.tilemap.pois.PoiEvent;
 			import net.infoaccelerator.travel.kayak.vo.HotelSearchResult;
 			import com.mapquest.tilemap.pois.PoiCollection;
 			import net.infoaccelerator.travel.kayak.vo.Hotel;
@@ -33,6 +18,7 @@
 			import mx.formatters.CurrencyFormatter;
 			
 			import net.infoaccelerator.travel.kayak.searches.KayakHotelSearch;	
+			import net.infoaccelerator.assets.SearchAssets;
 			
 			import com.mapquest.tilemap.controls.LargeZoomControl;
   			import com.mapquest.tilemap.controls.ViewControl;				
@@ -106,6 +92,7 @@
 						poi.setInfoTitle(hotels.getItemAt(i).name);
 						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
 						poi.setKey(hotels.getItemAt(i).id);
+						poi.addEventListener(PoiEvent.INFOWINDOW_OPEN,onPOIChosen);
 						this.map.addPoi(poi);
 					}
 					else{
@@ -114,6 +101,7 @@
 						poi.setInfoTitle(hotels.getItemAt(i).name);
 						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
 						poi.setKey(hotels.getItemAt(i).id);
+						poi.addEventListener(PoiEvent.INFOWINDOW_OPEN,onPOIChosen);
 						this.map.addPoi(poi);
 					}
 				}
@@ -152,13 +140,25 @@
 				}
 			}
 			
+			private function onPOIChosen(e:PoiEvent):void{
+				var poi:Poi = e.poi;
+				var hotels:ArrayCollection = hotelGrid.dataProvider as ArrayCollection;
+				var hotelCnt:int = hotels.length;
+				for(var i:int=0;i<hotelCnt;i++){
+					var cHotel:Hotel = hotels.getItemAt(i) as Hotel;
+					if(new Number(poi.getKey()) == cHotel.id){
+						hotelGrid.selectedIndex = i;
+						break;
+					}
+				}
+			}
+			
 			private function formatPrice(raw:Number):String{
 				var formatter:CurrencyFormatter = new CurrencyFormatter();
 				formatter.currencySymbol = "$";
 				formatter.alignSymbol = "left";
 				formatter.decimalSeparatorFrom = ".";
 				formatter.decimalSeparatorTo = ".";
-				
 				return formatter.format(raw);
 			}
 					
@@ -167,7 +167,7 @@
 	</mx:Script>	
 	
 	<mx:Canvas width="100%" height="100%">
-		<mx:Panel height="49%" layout="absolute" id="kayakPanel" title="Kayak Search &amp; Sort Parameters" top="10" left="10" right="10">
+		<mx:Panel height="49%" layout="absolute" id="kayakPanel" title="Kayak Hotel Search &amp; Sort Parameters" top="10" left="10" right="10">
 			<mx:HBox width="100%" y="198" x="10">
 				<mx:Label text="Number of Guests: " id="guestLabel"/>
 				<controls:AdvComboBox width="52" id="guests" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
@@ -255,12 +255,25 @@
 				<controls:hotelGrid id="hotelGrid" hotels="{hotelSearch.hotelResults.hotels}" click="onHotelGridClick(event)"  xmlns:controls="net.infoaccelerator.controls.*"/>
 			</mx:Panel>
 
+			<mx:VBox left="10" bottom="10">
+				<mx:Label text="Powered By: "/>
+				<mx:HBox>
+					<mx:Image id="ribbitLogo" source="{SearchAssets.RIBBIT}" width="150" height="55"/>
+					<mx:Image id="kayakLogo" source="{SearchAssets.KAYAK}" />
+					<mx:Image id="mqLogo" source="{SearchAssets.MAPQUEST}" />
+				</mx:HBox>
+			</mx:VBox>
+
 		</mx:Panel>
 		<mx:Panel height="48%" layout="absolute" left="10" width="49%" id="mapPanel" title="Search Results" bottom="10" >
 			<mq:TilemapComponent id="map" key="{this._mapquestKey}" zoom="3" width="100%" height="100%" xmlns:mq="com.mapquest.tilemap.*"/>
 		</mx:Panel>
 		<mx:Panel height="48%" layout="absolute" width="49%" right="10" id="detailPanel" title="Hotel Detail" bottom="10">
-			
+			<controls:RibbitPane id="hotelCallPane" panelTitle="Call Hotel" numberToCall="{hotelGrid.selectedItem.phone}" width="347" height="116" xmlns:controls="net.infoaccelerator.controls.*" y="111" x="10"/>
+			<mx:Label x="10" y="10" text="Hotel:  {hotelGrid.selectedItem.name}" id="hotelName"/>
+			<mx:Label x="10" y="36" text="Address: {hotelGrid.selectedItem.address} {hotelGrid.selectedItem.city} {hotelGrid.selectedItem.region}" id="addressLabel"/>
+			<mx:Label x="10" y="62" text="Stars: {hotelGrid.selectedItem.stars}" id="starsLabel"/>
+			<mx:Label x="10" y="88" text="Price Range: {formatPrice(hotelGrid.selectedItem.priceLow)} to {formatPrice(hotelGrid.selectedItem.priceHigh)}" id="rangeLabel"/>
 		</mx:Panel>
 	</mx:Canvas>
 </mx:Application>
