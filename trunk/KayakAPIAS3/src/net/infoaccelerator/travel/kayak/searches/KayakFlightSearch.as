@@ -113,8 +113,11 @@ package net.infoaccelerator.travel.kayak.searches
 		private function onPollResult(e:ResultEvent):void{
 					
 			
-			var search:Object = e.result.searchresult;
-			var intervalCheck:Boolean = search.morepending;
+			var search			:Object 			= e.result.searchresult;
+			var intervalCheck	:Boolean 			= search.morepending;
+			var segmentList		:ArrayCollection	= new ArrayCollection();
+			var segment			:Object				= new Object();
+			
 			
 			if(!intervalCheck){
 				flash.utils.clearInterval(_currentInterval);
@@ -141,17 +144,17 @@ package net.infoaccelerator.travel.kayak.searches
 						currentLeg.destination 			= legList.getItemAt(j).dest;
 						currentLeg.mDuration 			= legList.getItemAt(j).duration_minutes;
 						currentLeg.origin 				= legList.getItemAt(j).orig;
-						currentLeg.stops 				= legList.getItemAt(j).stops
-						if(legList.getItemAt(j).segment instanceof ArrayCollection){
-							var segmentList:ArrayCollection = legList.getItemAt(j).segment as ArrayCollection;
+						currentLeg.stops 				= legList.getItemAt(j).stops;
+						if(currentLeg.stops != 0){
+							segmentList = legList.getItemAt(j).segment as ArrayCollection;
 						}
 							else{
-								var segment:Object = legList.getItemAt(j).segment;
-								var segmentList:ArrayCollection = new ArrayCollection();
+								segment 	= legList.getItemAt(j).segment;
+								segmentList	= new ArrayCollection();
 								segmentList.addItem(segment);
 							}
-						var segmentLen:int 				= segmentList.length;
-						for(var k:int; k<segmentLen; k++){
+						var segmentLen:int = segmentList.length;
+						for(var k:int=0; k<segmentLen; k++){
 							var currentSegment:Segment 	= new Segment();
 							currentSegment.airline 		= segmentList.getItemAt(k).airline;
 							currentSegment.arrival 		= parseStringToDate(segmentList.getItemAt(k).at); //parse date & time
