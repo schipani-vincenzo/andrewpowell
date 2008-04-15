@@ -15,5 +15,8 @@ package net.infoaccelerator.assets
         [Embed("ws_wt_sm.gif")]
         public static const MAPQUEST:Class;
         
+        [Embed ("hotelIcon.gif")]
+		public static const HOTELICON:Class;
+        
 	}
 }

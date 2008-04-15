@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				width="100%" height="100%" 
+				layout="absolute" 
+				creationComplete="onInitView(event)">
 	<mx:Script>
 		<![CDATA[
+			import com.mapquest.tilemap.pois.MapIcon;
 			import mx.events.ValidationResultEvent;
 			import mx.validators.PhoneNumberValidator;
 			import com.mapquest.tilemap.pois.PoiEvent;
@@ -29,9 +33,20 @@
 			private var _key:String = "esm3gPbxTNuWHmfrb_7Azw";
 			[Bindable] private var hotelSearch:KayakHotelSearch = new KayakHotelSearch();
 			
-			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6y2l02ng%2Crw%3Do5-001a5";
-						
+			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6y2l02ng%2Crw%3Do5-001a5";		
+		    private var _oldPoi:Poi;
+		    private var _currentPoi:Poi;
+		    private var _mapIcon:MapIcon = new MapIcon();
+			
+			
 			public function onInitView(e:Event):void{
+				
+				_mapIcon.setImage(new SearchAssets.HOTELICON());
+				
+				
+				//center the main panel
+				kayakPanel.x = (this.width - kayakPanel.width)/2;
+				kayakPanel.y = (this.height - kayakPanel.height)/2;
 				
 				hotelSearch.devKey 			= _key;
 				hotelSearch.checkin_date 	= new Date();
@@ -70,10 +85,7 @@
 					hotelSearch.filterMode = this.filterMode.selectedItem as String;
 					hotelSearch.filterStars = this.stars.value;
 					hotelSearch.guests = this.guests.value as Number;
-					hotelSearch.rooms = this.rooms.value as Number;
-					hotelSearch.sortDirection = this.sortDirection.value as String;
-					hotelSearch.sortKey = this.sortKey.value as String;
-					
+					hotelSearch.rooms = this.rooms.value as Number;					
 					hotelSearch.hotelResults = new HotelSearchResult();
 					map.removeAllPois();
 										
@@ -131,15 +143,25 @@
 				Alert.show(locationString,"Ambiguous Location");
 			}
 			
-			private function onHotelGridClick(e:MouseEvent):void{
+			private function onHotelGridClick():void{
 				var currentHotel:Hotel = hotelGrid.selectedItem as Hotel;
 				var poiArray:PoiCollection = this.map.getPois();
 				var poiLen:int = poiArray.length;
+				if (_currentPoi != null)
+				{
+					this.map.removePoi(_currentPoi);
+					this.map.addPoi(_oldPoi);
+				}
+					
 				for(var i:int=0;i<poiLen;i++){
-					var currentPOI:Poi = poiArray.get(i);
-					if(currentHotel != null && (currentPOI.getKey() == currentHotel.id.toString())){
+					_currentPoi = poiArray.get(i);
+					_currentPoi.setIcon(_mapIcon);
+					_oldPoi = poiArray.get(i);
+					if(currentHotel != null && (_currentPoi.getKey() == currentHotel.id.toString())){
 						var newCenter:PointLL = new PointLL(new Number(currentHotel.lat), new Number(currentHotel.lon));
 						this.map.setCenter(newCenter,11);
+						this.map.removePoi(_currentPoi);
+						this.map.addPoi(_currentPoi);
 						break;
 					}
 				}
@@ -190,10 +212,22 @@
 		]]>
 	</mx:Script>	
 	
-	<mx:Canvas width="100%" height="100%">
-		<mx:Panel height="49%" layout="absolute" id="kayakPanel" title="Kayak Hotel Search &amp; Sort Parameters" top="10" left="10" right="10">
-			<mx:HBox width="100%" y="198" x="10">
-				<mx:Label text="Number of Guests: " id="guestLabel"/>
+	<mx:Style source="assets/css/stylesheet.css" />
+		
+	<mx:Panel height="90%" width="90%" layout="absolute" id="kayakPanel" title="Ribbit, Kayak, MapQuest Hotel Search Mashup" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+				
+		<mx:Form x="0" y="0" width="447" height="488" defaultButton="{searchButton}">				
+			<mx:Label id="kayakHeader" text="Kayak Hotel Search" />
+			<mx:FormItem id="citLbl" label="City:">
+				<mx:TextInput id="city" enabled="true" cornerRadius="4" text="{hotelSearch.city}" toolTip="City, State (Atlanta, GA)"/>
+			</mx:FormItem>
+			<mx:FormItem id="inLabel" label="Check In:">
+				<mx:DateField id="checkin_date" showToday="true"/>
+			</mx:FormItem>
+			<mx:FormItem id="outLabel" label="Check Out:">
+				<mx:DateField id="checkout_date" showToday="true"/>
+			</mx:FormItem>												
+			<mx:FormItem id="guestLabel" label="Number of Guests:">
 				<controls:AdvComboBox width="52" id="guests" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
 					<controls:dataProvider>
 						<mx:ArrayCollection>
@@ -206,8 +240,8 @@
 						</mx:ArrayCollection>
 					</controls:dataProvider>
 				</controls:AdvComboBox>
-				
-				<mx:Label text="Number of Rooms: " id="roomLabel"/>
+			</mx:FormItem>
+			<mx:FormItem id="roomLabel" label="Number of Rooms:">
 				<controls:AdvComboBox width="52" id="rooms" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
 					<controls:dataProvider>
 						<mx:ArrayCollection>
@@ -217,87 +251,56 @@
 						</mx:ArrayCollection>
 					</controls:dataProvider>
 				</controls:AdvComboBox>
-			</mx:HBox>
-			<mx:HBox width="731" y="10" x="10">
-				<mx:Label text="City: " id="citLbl"/>
-				<mx:TextInput id="city" enabled="true" cornerRadius="4" text="{hotelSearch.city}" toolTip="City, State (Atlanta, GA)"/>
-				<mx:Label text="Check In:" id="inLabel"/>
-				<mx:DateChooser id="checkin_date" showToday="true"/>
-				<mx:Label text="Check Out:" id="outLabel"/>
-				<mx:DateChooser id="checkout_date" showToday="true"/>
-			</mx:HBox>
-			<mx:HBox x="10" y="228" width="731">
-				<mx:HRule width="100%"/>
-			</mx:HBox>
-			<mx:HBox x="10" y="238" width="731">
-				<mx:VBox width="110">
-					<mx:Label text="Filter Mode:"/>
-					<controls:AdvComboBox width="100" id="filterMode" enabled="true" change="onFilterModeChange(event)"  xmlns:controls="net.infoaccelerator.controls.*">
-						<controls:dataProvider>
-							<mx:ArrayCollection>
-								<mx:Object label="normal" data="normal"/>
-								<mx:Object label="stars" data="stars"/>
-							</mx:ArrayCollection>
-						</controls:dataProvider>
-					</controls:AdvComboBox>
-				</mx:VBox>
-				
-				<mx:VBox width="169">
-					<mx:Label text="Stars:" id="starLabel" enabled="false"/>
-					<mx:HSlider id="stars" allowTrackClick="true" minimum="1" maximum="5" snapInterval="1" enabled="false"/>
-				</mx:VBox>
-				
-				<mx:VBox width="84" visible="false">
-					<mx:Label text="Sort Direction:"/>
-					<controls:AdvComboBox width="75" id="sortDirection" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
-						<controls:dataProvider>
-							<mx:ArrayCollection>
-								<mx:Object label="up" data="up"/>
-								<mx:Object label="down" data="down"/>
-							</mx:ArrayCollection>
-						</controls:dataProvider>
-					</controls:AdvComboBox>
-				</mx:VBox>
-				<mx:VBox width="84" visible="false">
-					<mx:Label text="Sort Key:"/>
-					<controls:AdvComboBox width="75" id="sortKey" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
-						<controls:dataProvider>
-							<mx:ArrayCollection>
-								<mx:Object label="price" data="price"/>
-								<mx:Object label="stars" data="stars"/>
-								<mx:Object label="hotel" data="hotel"/>
-								<mx:Object label="distance" data="distance"/>
-							</mx:ArrayCollection>
-						</controls:dataProvider>
-					</controls:AdvComboBox>
-				</mx:VBox>
-				
-				<mx:Button label="Start Hotel Search" id="searchButton" click="onSearchBtnClick(event)"/>
-				
-			</mx:HBox>
-			<mx:Panel y="10" width="350" height="274" layout="absolute" id="resultPanel" title="Hotels Found: {hotelSearch.hotelResults.count}" x="749">
-				<controls:hotelGrid id="hotelGrid" hotels="{hotelSearch.hotelResults.hotels}" click="onHotelGridClick(event)"  xmlns:controls="net.infoaccelerator.controls.*"/>
-			</mx:Panel>
-
-			<mx:VBox left="10" bottom="10">
-				<mx:Label text="Powered By: "/>
-				<mx:HBox>
-					<mx:Image id="ribbitLogo" source="{SearchAssets.RIBBIT}" width="150" height="55"/>
-					<mx:Image id="kayakLogo" source="{SearchAssets.KAYAK}" />
-					<mx:Image id="mqLogo" source="{SearchAssets.MAPQUEST}" />
-				</mx:HBox>
-			</mx:VBox>
-
+			</mx:FormItem>
+			
+			<mx:FormItem id="filterLabel" label="Filter Mode:" width="226">
+				<controls:AdvComboBox width="100" id="filterMode" enabled="true" change="onFilterModeChange(event)"  xmlns:controls="net.infoaccelerator.controls.*">
+					<controls:dataProvider>
+						<mx:ArrayCollection>
+							<mx:Object label="normal" data="normal"/>
+							<mx:Object label="stars" data="stars"/>
+						</mx:ArrayCollection>
+					</controls:dataProvider>
+				</controls:AdvComboBox>
+			</mx:FormItem>
+			<mx:FormItem id="starLabel" label="Stars:" enabled="false">				
+				<mx:HSlider id="stars" allowTrackClick="true" minimum="1" maximum="5" snapInterval="1" enabled="false"/>			
+			</mx:FormItem>
+			<mx:FormItem width="409" height="25">
+				<mx:Button label="Start Hotel Search" id="searchButton" click="onSearchBtnClick(event)"/>	
+			</mx:FormItem>
+			<mx:Label id="hotelResultsHeader" text="Hotels Found: {hotelSearch.hotelResults.count}"/>
+			<controls:hotelGrid id="hotelGrid" hotels="{hotelSearch.hotelResults.hotels}" change="onHotelGridClick()" xmlns:controls="net.infoaccelerator.controls.*" height="178" width="409"/>		
+		</mx:Form>
+		<mx:VBox x="455" y="0" width="90%">	
+			<mq:TilemapComponent id="map" key="{this._mapquestKey}" zoom="3" width="100%" height="465" xmlns:mq="com.mapquest.tilemap.*" />
+		</mx:VBox>
+		
+		<mx:Panel id="embedPanel" styleName="embedPanel" layout="absolute" x="455" y="343" backgroundAlpha=".7" backgroundColor="#ffffff" width="90%" headerHeight="0" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<controls:RibbitPane id="hotelCallPane" panelTitle="Call Hotel" numberToCall="{hotelGrid.selectedItem.phone}" width="305" height="117" xmlns:controls="net.infoaccelerator.controls.*" x="-18" y="-3"/>
+			<mx:Form id="hotelDetailForm" y="-2" x="248">					
+				<mx:FormItem label="Hotel:" id="hotelName">
+					<mx:Label id="hotelLabel" truncateToFit="true" text="{hotelGrid.selectedItem.name}" />
+				</mx:FormItem>
+				<mx:FormItem label="Address:" id="addressLabel">
+					<mx:Label text="{hotelGrid.selectedItem.address} {hotelGrid.selectedItem.city} {hotelGrid.selectedItem.region}"/>
+				</mx:FormItem>
+				<mx:FormItem label="Stars:" id="starsLabel">
+					<mx:Label text="{hotelGrid.selectedItem.stars}"/>
+				</mx:FormItem>
+				<mx:FormItem label="Price Range:" id="rangeLabel">
+					<mx:Label text="{formatPrice(hotelGrid.selectedItem.priceLow)} to {formatPrice(hotelGrid.selectedItem.priceHigh)}"/>
+				</mx:FormItem>
+			</mx:Form>
 		</mx:Panel>
-		<mx:Panel height="48%" layout="absolute" left="10" width="49%" id="mapPanel" title="Search Results" bottom="10" >
-			<mq:TilemapComponent id="map" key="{this._mapquestKey}" zoom="3" width="100%" height="100%" xmlns:mq="com.mapquest.tilemap.*"/>
-		</mx:Panel>
-		<mx:Panel height="48%" layout="absolute" width="49%" right="10" id="detailPanel" title="Hotel Detail" bottom="10">
-			<controls:RibbitPane id="hotelCallPane" panelTitle="Call Hotel" numberToCall="{hotelGrid.selectedItem.phone}" width="347" height="116" xmlns:controls="net.infoaccelerator.controls.*" y="111" x="10"/>
-			<mx:Label x="10" y="10" text="Hotel:  {hotelGrid.selectedItem.name}" id="hotelName"/>
-			<mx:Label x="10" y="36" text="Address: {hotelGrid.selectedItem.address} {hotelGrid.selectedItem.city} {hotelGrid.selectedItem.region}" id="addressLabel"/>
-			<mx:Label x="10" y="62" text="Stars: {hotelGrid.selectedItem.stars}" id="starsLabel"/>
-			<mx:Label x="10" y="88" text="Price Range: {formatPrice(hotelGrid.selectedItem.priceLow)} to {formatPrice(hotelGrid.selectedItem.priceHigh)}" id="rangeLabel"/>
-		</mx:Panel>
-	</mx:Canvas>
+		
+		<mx:ControlBar width="100%">
+			<mx:Spacer width="100%"/>
+			<mx:Label text="Powered By: "/>
+			<mx:Image id="ribbitLogo" source="{SearchAssets.RIBBIT}" />
+			<mx:Image id="kayakLogo" source="{SearchAssets.KAYAK}" />
+			<mx:Image id="mqLogo" source="{SearchAssets.MAPQUEST}" />
+        </mx:ControlBar>
+	</mx:Panel>
+	
 </mx:Application>

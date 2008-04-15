@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onInitView(event)">
+<mx:Form label="Call Hotel With Ribbit" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onInitView(event)">
 
 	
 	
@@ -47,11 +47,17 @@
 			/**
 			 * calls makeCall() when Call button is clicked
 			 */
-			private function makeCall():void {
-				request.makeCall(number.text); 
-				inCall=true;
-				callStatus.text = 'dialing';
-				hangUpButton.enabled=true;
+			private function makeCall(event:Event):void {
+				if (callButton.label == 'Call')
+				{
+					request.makeCall(number.text); 
+					inCall=true;
+					loggingStatus.text = loggingStatus.text + ' (dialing)';
+				}
+				else
+				{
+					request.hangup(_activeCall);
+				}
 			}
 			
 			/**
@@ -72,14 +78,9 @@
 			 * calls answerCall() when answerCall button is clicked
 			 */				
 			private function answerCall():void {
-				_activeCall = _incomingCall;
-				
-				request.answerCall(_activeCall); 
-				
-
-				hangUpButton.enabled=true;
-
-				
+				_activeCall = _incomingCall;				
+				request.answerCall(_activeCall);				
+				callButton.label = 'Hang Up';				
 				inCall=true;
 			}
 
@@ -87,8 +88,8 @@
 			 * event handler for callRinging, sent from RibbitReuqest Object
 			 */		
 			private function handleCallRinging():void {
-				callButton.enabled=false;
-				callStatus.text = 'ringing';
+				callButton.label = 'Hang Up';
+				loggingStatus.text = loggingStatus.text + ' (ringing)';
 			}
 
 			/**
@@ -97,13 +98,9 @@
 			private function handleCallConnected(call:CallObject):void {								
 				_activeCall = call;
 				
-				//trace("***** " + _activeCall.callID + " " + _activeCall.status);
-				
-				callButton.enabled=false; 
-				hangUpButton.enabled=true; 
-				
-				
-				callStatus.text = 'connected';
+				//trace("***** " + _activeCall.callID + " " + _activeCall.status);				
+				callButton.label = 'Hang Up'; 
+				loggingStatus.text = loggingStatus.text + ' (connected)';
 			}
 			
 			/**
@@ -115,7 +112,7 @@
 				
 				_activeCall = new CallObject();
 				
-				callStatus.text = 'ended';
+				loggingStatus.text = loggingStatus.text + ' (ended)';
 			}			
 
 			/**
@@ -124,12 +121,8 @@
 			private function handleCallHungup(hangingUpCall:CallObject):void {
 				
 				//trace("***** " + hangingUpCall.callID + " " + hangingUpCall.status);
-				
-				callButton.enabled=true; 
-				hangUpButton.enabled=false; 
-
-				
-				callStatus.text = 'hungup';
+				callButton.label = 'Call';				
+				loggingStatus.text = loggingStatus.text + ' (hungup)';
 				inCall=false;
 			}
 			
@@ -139,24 +132,14 @@
 			
 		]]>
 	</mx:Script>
-		
-	<mx:Panel width="100%" height="100%" layout="absolute" title="{panelTitle}" borderColor="#CCCCCC">
-		<mx:VBox >
-			<mx:Label text="" id="loggingStatus"/>
-			<mx:HBox>
-				<mx:Label text="Number to Call:" />
-				<mx:TextInput text="{numberToCall}" editable="false" id="number" />				
-			</mx:HBox>
-			<mx:HBox>
-				<mx:Button id="callButton" label="Call" click="makeCall();" enabled="false"  width="80" styleName="go"/>
-				<mx:Label id="callStatus" text="" />
-				<mx:Button id="hangUpButton" label="Hang Up" click="{request.hangup(_activeCall);}" enabled="false" width="80" styleName="end"/>
-			</mx:HBox>
-			
-		</mx:VBox>
-		
-	</mx:Panel>
 	
-	
+	<mx:Label text="" id="loggingStatus" width="267"/>
+	<mx:FormItem label="Number to Call:" >
+		<mx:TextInput text="{numberToCall}" editable="false" id="number" />
+	</mx:FormItem>								
+	<mx:FormItem>
+		<mx:Button id="callButton" label="Call" click="makeCall(event);" enabled="false"  width="80" styleName="go"/>
+	</mx:FormItem>
 
-</mx:Canvas>
+	
+</mx:Form>

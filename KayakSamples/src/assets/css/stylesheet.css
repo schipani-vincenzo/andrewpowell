@@ -1,0 +1,94 @@
+Application {
+   backgroundGradientColors: #609734, #FFFFFF;
+   themeColor: #609734;
+   backgroundGradientAlphas: 1.0, 1.0;
+}
+
+Panel {
+   titleStyleName: "panelMainTitle";
+   dropShadowEnabled: false;
+   borderColor: #FFFFFF;
+}
+
+.panelMainTitle {
+   fontFamily: Myriad;
+   fontSize: 20;
+   color: #ffffff;
+   fontWeight: normal;
+}
+
+.embedPanel {
+   borderStyle: none;
+   borderThickness: 0;
+   cornerRadius: 0;
+}
+
+Label {
+	fontWeight: bold;
+}
+	
+Button {
+	themeColor: #609734;
+}
+
+FormItem {
+	fontWeight: bold;
+}	
+
+ComboBox {
+   themeColor: #609734;
+}
+
+List {
+   themeColor: #609734;
+}
+
+Button {
+   themeColor: #609734;
+}
+
+.printLabel{
+	fontFamily: Myriad;
+	color: #000000;
+	fontSize: 14;
+	fontWeight: bold;
+	paddingLeft: 0;
+	paddingTop: 0;	
+}
+
+.printHeader{
+	fontFamily: Myriad;
+	color: #000000;
+	fontSize: 18;
+	fontWeight: bold;
+	paddingLeft: 0;
+	paddingTop: 0;	
+}
+
+.appTitle {
+	fontFamily: Myriad;
+	fontSize: 24;
+	color: #FFFFFF;
+	fontWeight: normal;
+}
+
+@font-face {
+    src: url("../fonts/MyriadWebPro.ttf") ;
+    fontFamily: Myriad;
+    unicodeRange:
+           U+0041-U+005A, /* Upper-Case [A..Z] */
+           U+0061-U+007A, /* Lower-Case a-z */
+           U+0030-U+0039, /* Numbers [0..9] */
+           U+002E-U+002E; /* Period [.] */
+}
+
+@font-face {
+    src: url("../fonts/MyriadWebPro-Bold.ttf") ;
+    fontFamily: Myriad;
+    fontWeight: bold;
+    unicodeRange:
+           U+0041-U+005A, /* Upper-Case [A..Z] */
+           U+0061-U+007A, /* Lower-Case a-z */
+           U+0030-U+0039, /* Numbers [0..9] */
+           U+002E-U+002E; /* Period [.] */
+}
