@@ -214,7 +214,7 @@
 	
 	<mx:Style source="assets/css/stylesheet.css" />
 		
-	<mx:Panel height="90%" width="90%" layout="absolute" id="kayakPanel" title="Ribbit, Kayak, MapQuest Hotel Search Mashup" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	<mx:Panel width="90%" layout="absolute" id="kayakPanel" title="Ribbit, Kayak, MapQuest Hotel Search Mashup" horizontalScrollPolicy="off" verticalScrollPolicy="off" height="568">
 				
 		<mx:Form x="0" y="0" width="447" height="488" defaultButton="{searchButton}">				
 			<mx:Label id="kayakHeader" text="Kayak Hotel Search" />
