@@ -360,9 +360,9 @@
 		<mx:ControlBar width="100%">
 			<mx:Spacer width="100%"/>
 			<mx:Label text="Powered By: "/>
-			<mx:Button id="btnRibbit" upSkin="{SearchAssets.RIBBIT}" overSkin="{SearchAssets.RIBBIT_OVER}" downSkin="{SearchAssets.RIBBIT}" click="goToURL('http://developer.ribbit.com')" />
-			<mx:Button id="btnKayak" upSkin="{SearchAssets.KAYAK}" overSkin="{SearchAssets.KAYAK_OVER}" downSkin="{SearchAssets.KAYAK}" click="goToURL('http://www.kayak.com/labs/')" />
-			<mx:Button id="btnMapQuest" upSkin="{SearchAssets.MAPQUEST}" overSkin="{SearchAssets.MAPQUEST_OVER}" downSkin="{SearchAssets.MAPQUEST}" click="goToURL('http://developer.mapquest.com/')" />
+			<mx:Button id="btnRibbit" toolTip="Click to go to Ribbit Developer Site." upSkin="{SearchAssets.RIBBIT}" overSkin="{SearchAssets.RIBBIT_OVER}" downSkin="{SearchAssets.RIBBIT}" click="goToURL('http://developer.ribbit.com')" />
+			<mx:Button id="btnKayak" toolTip="Click to go to Kayak Developer Site." upSkin="{SearchAssets.KAYAK}" overSkin="{SearchAssets.KAYAK_OVER}" downSkin="{SearchAssets.KAYAK}" click="goToURL('http://www.kayak.com/labs/')" />
+			<mx:Button id="btnMapQuest" toolTip="Click to go to MapQuest Developer Network." upSkin="{SearchAssets.MAPQUEST}" overSkin="{SearchAssets.MAPQUEST_OVER}" downSkin="{SearchAssets.MAPQUEST}" click="goToURL('http://developer.mapquest.com/')" />
         </mx:ControlBar>
 	</mx:Panel>
 	
