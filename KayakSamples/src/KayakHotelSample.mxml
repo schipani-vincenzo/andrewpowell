@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+  			    xmlns:controls="net.infoaccelerator.controls.*"
 				width="100%" height="100%" 
 				layout="absolute" 
 				creationComplete="onInitView(event)">
 	<mx:Script>
 		<![CDATA[
+			import com.mapquest.tilemap.DefaultRolloverWindow;
+			import com.mapquest.tilemap.DefaultInfoWindow;
 			import com.mapquest.tilemap.pois.MapIcon;
 			import mx.events.ValidationResultEvent;
 			import mx.validators.PhoneNumberValidator;
@@ -36,13 +39,43 @@
 			[Bindable] private var _mapquestKey:String = "mjtd%7Clu6y2l02ng%2Crw%3Do5-001a5";		
 		    private var _oldPoi:Poi;
 		    private var _currentPoi:Poi;
-		    private var _mapIcon:MapIcon = new MapIcon();
-			
+		    private var _mapIcon:MapIcon = new MapIcon();			
+			private var _info:DefaultInfoWindow;
+			private var _roll:DefaultRolloverWindow;
+			private var _lrgZoomControl:LargeZoomControl = new LargeZoomControl;
+			private var _viewControl:ViewControl = new ViewControl();
 			
 			public function onInitView(e:Event):void{
 				
-				_mapIcon.setImage(new SearchAssets.HOTELICON());
+				//add map controls
+				_lrgZoomControl.setBackgroundColor(0xA7C58E);
+				_lrgZoomControl.setBorderColor(0xffffff);
+				_lrgZoomControl.setBorderAlpha(1);
+				_lrgZoomControl.setBackgroundEllipseWidth(0);				
+				_lrgZoomControl.setBackgroundEllipseHeight(0);
+				_lrgZoomControl.setBackgroundAlpha(.9);
 				
+				this.map.addControl(_lrgZoomControl);
+	      		this.map.addControl(_viewControl);
+				
+				_mapIcon.setImage(new SearchAssets.HOTELICON());
+				//reference the maps info window
+				_info = map.getInfoWindow() as DefaultInfoWindow;
+				_info.setBackgroundColor(0xA7C58E);
+				_info.setBorderColor(0xffffff);
+				_info.setBorderAlpha(1);
+				_info.setBackgroundEllipseWidth(0);				
+				_info.setBackgroundEllipseHeight(0);
+				_info.setBackgroundAlpha(.9);
+				
+				//reference the maps rollover window
+				_roll = map.getRolloverWindow() as DefaultRolloverWindow;
+				_roll.setBackgroundColor(0xA7C58E);
+				_roll.setBorderColor(0xffffff);
+				_roll.setBorderAlpha(1);
+				_roll.setBackgroundEllipseWidth(0);				
+				_roll.setBackgroundEllipseHeight(0);
+				_roll.setBackgroundAlpha(.9);
 				
 				//center the main panel
 				kayakPanel.x = (this.width - kayakPanel.width)/2;
@@ -61,9 +94,6 @@
 				hotelSearch.addEventListener("searchFailure",onSearchFailure);
 				hotelSearch.addEventListener("ambiguousLoction",onAmbiguousLocation);
 			
-				
-				this.map.addControl(new LargeZoomControl());
-	      		this.map.addControl(new ViewControl());
 			}
 			
 			private function onFilterModeChange(e:Event):void{
@@ -147,24 +177,29 @@
 				var currentHotel:Hotel = hotelGrid.selectedItem as Hotel;
 				var poiArray:PoiCollection = this.map.getPois();
 				var poiLen:int = poiArray.length;
+				
 				if (_currentPoi != null)
 				{
 					this.map.removePoi(_currentPoi);
 					this.map.addPoi(_oldPoi);
 				}
 					
-				for(var i:int=0;i<poiLen;i++){
+				for(var i:int=0;i < (poiLen - 1);i++){
 					_currentPoi = poiArray.get(i);
-					_currentPoi.setIcon(_mapIcon);
-					_oldPoi = poiArray.get(i);
 					if(currentHotel != null && (_currentPoi.getKey() == currentHotel.id.toString())){
 						var newCenter:PointLL = new PointLL(new Number(currentHotel.lat), new Number(currentHotel.lon));
+						_currentPoi.setIcon(_mapIcon);
+						_oldPoi = poiArray.get(i);
 						this.map.setCenter(newCenter,11);
 						this.map.removePoi(_currentPoi);
 						this.map.addPoi(_currentPoi);
 						break;
 					}
 				}
+				
+				//slide the embed panel out if it's hidden
+				showPanel();
+				
 			}
 			
 			private function onPOIChosen(e:PoiEvent):void{
@@ -207,16 +242,44 @@
 					return "";
 				
 			}
-					
+		  
+		   	private function showPanel():void {
+           		if (embedPanel.y != 343)
+           		{     
+	            	panelMove.end();
+	                panelMove.yTo = 343; 
+	                panelMove.play();
+	            } 
+            }			
+			
+			private function hidePanel():void {
+ 
+            	panelMove.end();
+                panelMove.yTo = 487; 
+                panelMove.play();
+
+            }	
+			
+			public function goToURL(urlStr:String):void {
+       
+		    	var webPageURL:URLRequest = new URLRequest( urlStr );
+		       
+		        navigateToURL(webPageURL, '_blank')
+		       
+		       
+		    }//end function goToURL    
 			
 		]]>
 	</mx:Script>	
 	
 	<mx:Style source="assets/css/stylesheet.css" />
 		
+	<mx:Move id="panelMove" target="{embedPanel}"/>	
+		
 	<mx:Panel width="90%" layout="absolute" id="kayakPanel" title="Ribbit, Kayak, MapQuest Hotel Search Mashup" horizontalScrollPolicy="off" verticalScrollPolicy="off" height="568">
 				
 		<mx:Form x="0" y="0" width="447" height="488" defaultButton="{searchButton}">				
+
 			<mx:Label id="kayakHeader" text="Kayak Hotel Search" />
 			<mx:FormItem id="citLbl" label="City:">
 				<mx:TextInput id="city" enabled="true" cornerRadius="4" text="{hotelSearch.city}" toolTip="City, State (Atlanta, GA)"/>
@@ -228,7 +291,7 @@
 				<mx:DateField id="checkout_date" showToday="true"/>
 			</mx:FormItem>												
 			<mx:FormItem id="guestLabel" label="Number of Guests:">
-				<controls:AdvComboBox width="52" id="guests" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
+				<controls:AdvComboBox width="52" id="guests" enabled="true">
 					<controls:dataProvider>
 						<mx:ArrayCollection>
 							<mx:Object label="1" data="1"/>
@@ -242,7 +305,7 @@
 				</controls:AdvComboBox>
 			</mx:FormItem>
 			<mx:FormItem id="roomLabel" label="Number of Rooms:">
-				<controls:AdvComboBox width="52" id="rooms" enabled="true"  xmlns:controls="net.infoaccelerator.controls.*">
+				<controls:AdvComboBox width="52" id="rooms" enabled="true">
 					<controls:dataProvider>
 						<mx:ArrayCollection>
 							<mx:Object label="1" data="1"/>
@@ -254,7 +317,7 @@
 			</mx:FormItem>
 			
 			<mx:FormItem id="filterLabel" label="Filter Mode:" width="226">
-				<controls:AdvComboBox width="100" id="filterMode" enabled="true" change="onFilterModeChange(event)"  xmlns:controls="net.infoaccelerator.controls.*">
+				<controls:AdvComboBox width="100" id="filterMode" enabled="true" change="onFilterModeChange(event)">
 					<controls:dataProvider>
 						<mx:ArrayCollection>
 							<mx:Object label="normal" data="normal"/>
@@ -270,13 +333,13 @@
 				<mx:Button label="Start Hotel Search" id="searchButton" click="onSearchBtnClick(event)"/>	
 			</mx:FormItem>
 			<mx:Label id="hotelResultsHeader" text="Hotels Found: {hotelSearch.hotelResults.count}"/>
-			<controls:hotelGrid id="hotelGrid" hotels="{hotelSearch.hotelResults.hotels}" change="onHotelGridClick()" xmlns:controls="net.infoaccelerator.controls.*" height="178" width="409"/>		
+			<controls:hotelGrid id="hotelGrid" hotels="{hotelSearch.hotelResults.hotels}" change="onHotelGridClick();" xmlns:controls="net.infoaccelerator.controls.*" height="178" width="409"/>		
 		</mx:Form>
 		<mx:VBox x="455" y="0" width="90%">	
 			<mq:TilemapComponent id="map" key="{this._mapquestKey}" zoom="3" width="100%" height="465" xmlns:mq="com.mapquest.tilemap.*" />
 		</mx:VBox>
-		
-		<mx:Panel id="embedPanel" styleName="embedPanel" layout="absolute" x="455" y="343" backgroundAlpha=".7" backgroundColor="#ffffff" width="90%" headerHeight="0" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		 
+		<controls:AdvPanel id="embedPanel" styleName="embedPanel" layout="absolute" x="455" y="487" backgroundAlpha=".7" backgroundColor="#ffffff" width="90%" headerHeight="16" horizontalScrollPolicy="off" verticalScrollPolicy="off" cancelClickEvent="hidePanel();">
 			<controls:RibbitPane id="hotelCallPane" panelTitle="Call Hotel" numberToCall="{hotelGrid.selectedItem.phone}" width="305" height="117" xmlns:controls="net.infoaccelerator.controls.*" x="-18" y="-3"/>
 			<mx:Form id="hotelDetailForm" y="-2" x="248">					
 				<mx:FormItem label="Hotel:" id="hotelName">
@@ -292,14 +355,14 @@
 					<mx:Label text="{formatPrice(hotelGrid.selectedItem.priceLow)} to {formatPrice(hotelGrid.selectedItem.priceHigh)}"/>
 				</mx:FormItem>
 			</mx:Form>
-		</mx:Panel>
+		</controls:AdvPanel>
 		
 		<mx:ControlBar width="100%">
 			<mx:Spacer width="100%"/>
 			<mx:Label text="Powered By: "/>
-			<mx:Image id="ribbitLogo" source="{SearchAssets.RIBBIT}" />
-			<mx:Image id="kayakLogo" source="{SearchAssets.KAYAK}" />
-			<mx:Image id="mqLogo" source="{SearchAssets.MAPQUEST}" />
+			<mx:Button id="btnRibbit" upSkin="{SearchAssets.RIBBIT}" overSkin="{SearchAssets.RIBBIT_OVER}" downSkin="{SearchAssets.RIBBIT}" click="goToURL('http://developer.ribbit.com')" />
+			<mx:Button id="btnKayak" upSkin="{SearchAssets.KAYAK}" overSkin="{SearchAssets.KAYAK_OVER}" downSkin="{SearchAssets.KAYAK}" click="goToURL('http://www.kayak.com/labs/')" />
+			<mx:Button id="btnMapQuest" upSkin="{SearchAssets.MAPQUEST}" overSkin="{SearchAssets.MAPQUEST_OVER}" downSkin="{SearchAssets.MAPQUEST}" click="goToURL('http://developer.mapquest.com/')" />
         </mx:ControlBar>
 	</mx:Panel>
 	

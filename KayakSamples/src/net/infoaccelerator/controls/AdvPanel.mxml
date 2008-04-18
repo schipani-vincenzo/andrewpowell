@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml">
+
+   <mx:Metadata>
+   	 [Event(name="cancelClickEvent", type="flash.events.MouseEvent")]
+   </mx:Metadata>
+	
+   <mx:Script>
+      <![CDATA[
+         import mx.containers.Panel;
+         import mx.controls.Image;
+         import mx.containers.HBox;
+         import flash.events.MouseEvent;
+         import mx.controls.Alert;
+
+         // Embed the icon graphics and their rollover states
+         [Embed("../assets/cancelOrig.png")]
+         private var cancelButtonOrig:Class;
+         
+         [DefaultTriggerEvent("click")]
+         [Embed("../assets/cancelOver.png")]
+         private var cancelButtonOver:Class;
+
+         // Declare the UI elements which will go into the titleBar
+         private var hBox:HBox;
+         private var cancelOrig:Image;
+         private var cancelOver:Image;
+
+         override protected function createChildren() : void
+         {
+            super.createChildren();
+            
+            // Init cancel image, its event handlers and its rollover state
+            cancelOrig = new Image();
+            cancelOrig.source = cancelButtonOrig;
+            cancelOrig.width = 16;
+            cancelOrig.height = 16;
+            cancelOrig.addEventListener( MouseEvent.CLICK, cancelClickEventHandler );
+            cancelOrig.addEventListener( MouseEvent.MOUSE_OVER, onCancelOver );
+            cancelOver = new Image();
+            cancelOver.source = cancelButtonOver;
+            cancelOver.width = 16;
+            cancelOver.height = 16;
+            cancelOver.addEventListener( MouseEvent.CLICK, cancelClickEventHandler );
+            cancelOrig.addEventListener( MouseEvent.MOUSE_OUT, onCancelOut );
+
+            // Create an HBox in which to layout the icons
+            hBox = new HBox( );
+            hBox.addChild( cancelOrig );
+
+            // Add the HBox and the icons to the titleBar display
+            titleBar.addChild( hBox );
+
+         }
+
+         override protected function updateDisplayList (unscaledWidth:Number, unscaledHeight:Number):void
+         {
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+
+            // Do this or the HBox won't appear!
+            hBox.setActualSize( hBox.getExplicitOrMeasuredWidth(),
+            hBox.getExplicitOrMeasuredHeight() );
+
+            // Position the HBox
+            var y:int = 4;
+            var x:int = this.width - hBox.width - 12;
+            hBox.move(x, y);
+         }
+
+         // Handlers for click and mouseovers
+         public function cancelClickEventHandler ( event:MouseEvent ):void {
+            //dispath this event
+            dispatchEvent(new MouseEvent("cancelClickEvent", true));
+         }
+         
+         private function onCancelOver ( event:MouseEvent ):void {
+            cancelOrig.source = cancelButtonOver;
+         }
+         
+         private function onCancelOut ( event:MouseEvent ):void {
+            cancelOrig.source = cancelButtonOrig;
+         }
+      ]]>
+   </mx:Script>
+
+</mx:Panel>
