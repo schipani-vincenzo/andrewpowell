@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.containers.Panel;
+			import mx.controls.Image;
+			import mx.containers.HBox;
+			import flash.events.MouseEvent;
+			import mx.controls.Alert;
+
+			// Embed the icon graphics and their rollover states
+			[Embed("square_blue.png")]
+			private var blueSquare:Class;
+			[Embed("square_blue_hi.png")]
+			private var blueSquareHi:Class;
+			[Embed("square_green.png")]
+			private var greenSquare:Class;
+			[Embed("square_green_hi.png")]
+			private var greenSquareHi:Class;
+
+			// Declare the UI elements which will go into the titleBar
+			private var myHbox:HBox;
+			private var blue:Image;
+			private var blueHi:Image;
+			private var green:Image;
+			private var greenHi:Image;
+
+			override protected function createChildren() : void
+			{
+				super.createChildren();
+
+				// Init blue image, its event handlers and its rollover state
+				blue = new Image();
+				blue.source = blueSquare;
+				blue.width = 18;
+				blue.height = 18;
+				blue.addEventListener( MouseEvent.CLICK, onBlueClick );
+				blue.addEventListener( MouseEvent.MOUSE_OVER, onBlueOver );
+				blueHi = new Image();
+				blueHi.source = blueSquareHi;
+				blueHi.width = 18;
+				blueHi.height = 18;
+				blueHi.addEventListener( MouseEvent.CLICK, onBlueClick );
+				blue.addEventListener( MouseEvent.MOUSE_OUT, onBlueOut );
+
+				// Init green image, its event handlers and its rollover state
+				green = new Image();
+				green.source = greenSquare;
+				green.width = 18;
+				green.height = 18;
+				green.addEventListener( MouseEvent.CLICK, onGreenClick );
+				green.addEventListener( MouseEvent.MOUSE_OVER, onGreenOver );
+				greenHi = new Image();
+				greenHi.source = greenSquareHi;
+				greenHi.width = 18;
+				greenHi.height = 18;
+				greenHi.addEventListener( MouseEvent.CLICK, onGreenClick );
+				green.addEventListener( MouseEvent.MOUSE_OUT, onGreenOut );
+
+				// Create an HBox in which to layout the icons
+				myHbox = new HBox( );
+				myHbox.addChild( blue );
+				myHbox.addChild( green );
+
+				// Add the HBox and the icons to the titleBar display
+				titleBar.addChild( myHbox );
+
+			}
+
+			override protected function updateDisplayList (unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+
+				// Do this or the HBox won't appear!
+				myHbox.setActualSize( myHbox.getExplicitOrMeasuredWidth(),
+				myHbox.getExplicitOrMeasuredHeight() );
+
+				// Position the HBox
+				var y:int = 4;
+				var x:int = this.width - myHbox.width - 12;
+				myHbox.move(x, y);
+			}
+
+			// Handlers for click and mouseovers
+			private function onBlueClick ( event:MouseEvent ):void {
+				Alert.show('Blue!', 'You clicked...');
+			}
+			private function onBlueOver ( event:MouseEvent ):void {
+				blue.source = blueSquareHi;
+			}
+			private function onBlueOut ( event:MouseEvent ):void {
+				blue.source = blueSquare;
+			}
+
+			private function onGreenClick ( event:MouseEvent ):void {
+				Alert.show('Green!', 'You clicked...');
+			}
+			private function onGreenOver ( event:MouseEvent ):void {
+				green.source = greenSquareHi;
+			}
+			private function onGreenOut ( event:MouseEvent ):void {
+				green.source = greenSquare;
+			}
+		]]>
+	</mx:Script>
+
+</mx:Panel>
