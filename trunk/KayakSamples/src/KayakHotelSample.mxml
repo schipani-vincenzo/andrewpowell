@@ -6,6 +6,12 @@
 				creationComplete="onInitView(event)">
 	<mx:Script>
 		<![CDATA[
+			import com.mapquest.GeoAddress;
+			import com.mapquest.LocationCollection;
+			import com.mapquest.ExecFaultEvent;
+			import com.mapquest.ExecResultEvent;
+			import com.mapquest.Exec;
+			import com.mapquest.SingleLineAddress;
 			import com.mapquest.tilemap.DefaultRolloverWindow;
 			import com.mapquest.tilemap.DefaultInfoWindow;
 			import com.mapquest.tilemap.pois.MapIcon;
@@ -21,6 +27,8 @@
 			import com.mapquest.PointLL;
 			import mx.collections.ArrayCollection;
 			import net.infoaccelerator.travel.kayak.events.SearchCompleteEvent;
+			import net.infoaccelerator.KeyChain;
+			
 			
 			import mx.controls.Alert;
 			import mx.managers.CursorManager;
@@ -44,6 +52,7 @@
 			private var _roll:DefaultRolloverWindow;
 			private var _lrgZoomControl:LargeZoomControl = new LargeZoomControl;
 			private var _viewControl:ViewControl = new ViewControl();
+			private var _keyChain:KeyChain = new KeyChain();
 			
 			public function onInitView(e:Event):void{
 				
@@ -119,11 +128,52 @@
 					hotelSearch.hotelResults = new HotelSearchResult();
 					map.removeAllPois();
 										
+					geocodeAndCenter(hotelSearch.city);										
+										
 					CursorManager.setBusyCursor();
 					hotelSearch.doSearch();
+					
+					
 				}
 					else
 						Alert.show("Search In Progress.  Please Wait, then try again","Search In Progress");
+			}
+			
+			private function geocodeAndCenter(searchString:String):void {
+				// Set server name, location and path for the geocoding server.
+				var serverName:String = "geocode.access.mapquest.com";
+				var serverPath:String = "mq";
+				var serverPort:int = 80;
+				var clientId:String = _keyChain.mapquestClientID;
+				var password:String = _keyChain.mapquestPassword;
+				//Create and EXEC object. Passing in the server info.
+				var exec:Exec = new Exec(serverName, serverPath, serverPort);
+				// Set the client ID and Password
+				exec.setClientId(clientId);
+				exec.setPassword(password);
+				//Create a address object
+				var address:SingleLineAddress = new SingleLineAddress();
+				// Pouplate the address object with the values entered.
+				address.setAddress(searchString);
+				// Add a listener to the exec object. To handle the Geocode response - Success.
+				exec.addEventListener(Exec.TRANS_TYPE_GEOCODE, this.onGeocode);
+				// Add a listener to the exec object. To handle the Geocode response - Error.
+				exec.addEventListener(Exec.EVENT_DO_TRANSACTION_ERROR,onGeoCodeError);
+				// Call the geocode function of the exec object. Give it the address object to be geocoded
+				exec.geocode(address);
+			}
+			
+			private function onGeocode(e:ExecResultEvent):void{
+
+				var lc:LocationCollection = LocationCollection(e.resultData);
+
+				var geoAddr:GeoAddress = GeoAddress(lc.get(0));
+
+				var point:PointLL = new PointLL(geoAddr.getLatLng().lat,geoAddr.getLatLng().lng);
+				this.map.setCenter(point,7);
+			}
+			
+			private function onGeoCodeError(e:ExecFaultEvent):void{
 			}
 			
 			
@@ -132,17 +182,7 @@
 				var hotelLen:int 	= hotels.length;
 							
 				for(var i:int=0;i<hotelLen;i++){
-					if(i==0){
-						var newCenter:PointLL = new PointLL(hotels.getItemAt(i).lat,hotels.getItemAt(i).lon);
-						this.map.setCenter(newCenter,7);
-						var poi:Poi = new Poi(newCenter);
-						poi.setInfoTitle(hotels.getItemAt(i).name);
-						poi.setInfoContent("Stars: " + hotels.getItemAt(i).stars.toString() + "\nPhone: " + hotels.getItemAt(i).phone + "\nLow Price: " + formatPrice(hotels.getItemAt(i).priceLow) + "\nHigh Price: " + formatPrice(hotels.getItemAt(i).priceHigh));
-						poi.setKey(hotels.getItemAt(i).id);
-						poi.addEventListener(PoiEvent.INFOWINDOW_OPEN,onPOIChosen);
-						this.map.addPoi(poi);
-					}
-					else{
+					
 						var newPoint:PointLL = new PointLL(hotels.getItemAt(i).lat,hotels.getItemAt(i).lon);
 						var poi:Poi = new Poi(newPoint);
 						poi.setInfoTitle(hotels.getItemAt(i).name);
@@ -150,7 +190,7 @@
 						poi.setKey(hotels.getItemAt(i).id);
 						poi.addEventListener(PoiEvent.INFOWINDOW_OPEN,onPOIChosen);
 						this.map.addPoi(poi);
-					}
+					
 				}
 				CursorManager.removeBusyCursor();
 			}
