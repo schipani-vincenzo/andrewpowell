@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Form label="Call Hotel With Ribbit" xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="onInitView(event)">
 
-	
+	<mx:Style source="../../../Beta2Style_Simple.css"/>
 	
 	<ribbit:RibbitRequest id="request"
 		loggingIn="loggingStatus.text='Logging In To Ribbit VOIP';" 
