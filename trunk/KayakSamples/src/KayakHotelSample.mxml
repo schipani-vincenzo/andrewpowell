@@ -4,6 +4,7 @@
 				width="100%" height="100%" 
 				layout="absolute" 
 				creationComplete="onInitView(event)">
+	<mx:Style source="Beta2Style_Simple.css"/>
 	<mx:Script>
 		<![CDATA[
 			import com.mapquest.GeoAddress;
@@ -121,7 +122,7 @@
 					hotelSearch.checkin_date = this.checkin_date.selectedDate;
 					hotelSearch.checkout_date = this.checkout_date.selectedDate;
 					hotelSearch.city = this.city.text;
-					hotelSearch.filterMode = this.filterMode.selectedItem as String;
+					hotelSearch.filterMode = this.filterMode.value as String;
 					hotelSearch.filterStars = this.stars.value;
 					hotelSearch.guests = this.guests.value as Number;
 					hotelSearch.rooms = this.rooms.value as Number;					
@@ -316,7 +317,7 @@
 		
 	<mx:Move id="panelMove" target="{embedPanel}"/>	
 		
-	<mx:Panel width="90%" layout="absolute" id="kayakPanel" title="Ribbit, Kayak, MapQuest Hotel Search Mashup" horizontalScrollPolicy="off" verticalScrollPolicy="off" height="568">
+	<mx:Panel width="90%" layout="absolute" id="kayakPanel" title="Hotel Search and Call" horizontalScrollPolicy="off" verticalScrollPolicy="off" height="568">
 				
 		<mx:Form x="0" y="0" width="447" height="488" defaultButton="{searchButton}">				
 

@@ -2,6 +2,7 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="onInitView(event)">
 	<mx:Script>
 		<![CDATA[
+			import net.infoaccelerator.travel.kayak.events.SearchCompleteEvent;
 						
 			import net.infoaccelerator.travel.kayak.searches.KayakFlightSearch;					
 					
@@ -12,21 +13,26 @@
 			public function onInitView(e:Event):void{
 				
 				flightSearch.devKey = _key;
-				flightSearch.depart_date = new Date(2008,5,3);
+				flightSearch.depart_date = new Date(2008,4,7);
 				flightSearch.depart_time = "a";
-				flightSearch.destination = "DEN";
+				flightSearch.destination = "DSM";
 				flightSearch.cabin = "e";
 				flightSearch.oneway = false;
-				flightSearch.origin = "ATL";
-				flightSearch.return_date = new Date(2008,5,10);
+				flightSearch.origin = "GRR";
+				flightSearch.return_date = new Date(2008,4,11);
 				flightSearch.return_time = "a";
 				flightSearch.travelers = 1;
 				flightSearch.filterMode = "normal";
 				flightSearch.sortDirection = "up";
 				flightSearch.sortKey = "price";
+				flightSearch.addEventListener("searchComplete",onSearchResult);
 				flightSearch.doSearch();
 
-			}					
+			}				
+			
+			private function onSearchResult(e:SearchCompleteEvent):void{
+				var i:int=0;
+			}	
 					
 			
 		]]>
@@ -46,7 +52,7 @@
 			<mx:DataGridColumn headerText="Legs">
 				<mx:itemRenderer>
 					<mx:Component>
-						<mx:Label text="{data.legs.getItemAt(0).airline}"/>
+						<mx:Label text="{data.legs.getItemAt(0).segments.length}"/>
 					</mx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
