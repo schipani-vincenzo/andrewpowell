@@ -10,12 +10,12 @@
        this.setDomainCookies = "no";
        this.scriptProtect = "all";   
        //This is here to remind you to put a mapping the CFADMIN to the "net" directory
-	   //this.mappings["/net"] = expandPath("/kayak/net");
+	   this.mappings["/net"] = expandPath("../kayak/net");
    </cfscript>
    
    <cffunction name="onApplicationStart" output="false">
        <cfscript>
-         appliction.airportLookupService = createObject('component','net.infoaccelerator.travel.kayak.ajaxServices.AirportLookupService');
+         application.airportLookupService = createObject('component','net.infoaccelerator.travel.kayak.ajaxServices.AirportLookupService');
          application.sessions = 0;
        </cfscript>
       
