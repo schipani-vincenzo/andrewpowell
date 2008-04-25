@@ -1,22 +1,22 @@
 <cfcomponent>
 <cfscript>
-       this.name = "EnterpriseMVC";
-       this.applicationTimeout = createTimeSpan(0,0,0,1);
+       this.name = "CFObjectiveDemo";
+       this.applicationTimeout = createTimeSpan(0,2,0,0);
        this.clientmanagement= "yes";
        this.loginstorage = "session" ;
        this.sessionmanagement = "yes";
-       this.sessiontimeout = createTimeSpan(0,0,0,1);
+       this.sessiontimeout = createTimeSpan(0,0,30,0);
        this.setClientCookies = "yes";
        this.setDomainCookies = "no";
        this.scriptProtect = "all";   
-	   this.mappings["/net"] 	= 	expandPath("/cfObjective2008/net");
-	   this.mappings["/MachII"]	=	expandPath("/cfObjective2008/MachII");
+       //This is here to remind you to put a mapping the CFADMIN to the "net" directory
+	   this.mappings["/com"] = expandPath("com/");
+	   this.mappings["/MachII"] = expandPath("MachII/");
    </cfscript>
    
    <cffunction name="onApplicationStart" output="false">
        <cfscript>
-         //set your app vars for the application          application.dsn = "theDSN";
-         application.sessions = 0;
+          application.sessions = 0;
        </cfscript>
       
              
