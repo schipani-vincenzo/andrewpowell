@@ -1,7 +1,7 @@
-<project name="EnterpriseMVC" default="copy" basedir=".">
+<project name="KayakAPI" default="copy" basedir=".">
 
   <!-- set global properties for this build -->
-  <property name="destdir"  location="/UM/oscode/server/default/deploy/cfusion.ear/cfusion.war/entMVC"/>
+  <property name="destdir"  location="/UM/oscode/server/default/deploy/cfobjective.war/preso"/>
 
   <target name="copy">
     <!-- Create the time stamp -->
@@ -11,6 +11,8 @@
     <copy todir="${destdir}">
 		<fileset dir="${basedir}">
 		  	<exclude name="**/build.xml"/>
+			<exclude name="**/.DS_Store"/>
+			<exclude name="**/.project"/>
 		</fileset>
 	</copy>
   </target>
