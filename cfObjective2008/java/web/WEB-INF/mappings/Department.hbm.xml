@@ -1,0 +1,16 @@
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.universalmind.samples.employeemanager.model.Department" table="departments" lazy="false">
+        <id column="id" name="id">
+            <generator class="uuid"/>
+        </id>
+        <property name="name"/>
+        <many-to-one name="manager" class="com.universalmind.samples.employeemanager.model.Manager" lazy="false" column="mgrID" unique="true"/>
+        <list name="employees" table="department_employees" lazy="false" fetch="select">
+            <key column="dptID"/>
+            <index column="idx_dpt" />
+            <many-to-many column="empID" unique="true" class="com.universalmind.samples.employeemanager.model.Employee" lazy="false"/>
+        </list>
+    </class>
+</hibernate-mapping>
