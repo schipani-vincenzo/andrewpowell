@@ -1,0 +1,22 @@
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.universalmind.samples.employeemanager.model.Employee" table="employees" lazy="false" >
+        <id name="id" column="id">
+            <generator class="uuid"/>
+        </id>
+               
+        <property name="firstName"/>
+        <property name="lastName"/>
+        <property name="birthdate"/>
+        <property name="hireDate"/>
+        <property name="title"/>
+        <property name="salary"/>
+        <many-to-one name="manager" column="mgrID" class="com.universalmind.samples.employeemanager.model.Manager" lazy="false" fetch="join"/>
+
+        <joined-subclass name="com.universalmind.samples.employeemanager.model.Manager" table="managers" lazy="false">
+            <key column="id"/>
+            <property name="rating"/>
+        </joined-subclass>
+    </class>
+</hibernate-mapping>

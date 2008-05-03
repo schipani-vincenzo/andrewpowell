@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="dptDAO" class="com.universalmind.samples.employeemanager.dataAccess.DepartmentDAO">
+        <property name="hibernateTemplate" ref="umHibernateTemplate"/>
+    </bean>
+
+    <bean id="empDAO" class="com.universalmind.samples.employeemanager.dataAccess.EmployeeDAO">
+        <property name="hibernateTemplate" ref="umHibernateTemplate"/>
+    </bean>
+
+    <bean id="mgrDAO" class="com.universalmind.samples.employeemanager.dataAccess.ManagerDAO">
+        <property name="hibernateTemplate" ref="umHibernateTemplate"/>
+    </bean>
+
+    <bean id="empMgrService" class="com.universalmind.samples.employeemanager.services.EmployeeManagerService">
+        <property name="dptDAO" ref="dptDAO"/>
+        <property name="empDAO" ref="empDAO"/>
+        <property name="mgrDAO" ref="mgrDAO"/>
+    </bean>
+
+    <bean id="dptVO" class="com.universalmind.samples.employeemanager.model.Department" scope="prototype"/>
+
+    <bean id="empVO" class="com.universalmind.samples.employeemanager.model.Employee" scope="prototype"/>
+
+    <bean id="mgrVO" class="com.universalmind.samples.employeemanager.model.Manager" scope="prototype"/>
+
+
+</beans>
