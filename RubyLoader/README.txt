@@ -17,3 +17,6 @@ See /src/example.cfm for an example of how to use RubyLoader
 
 LICENSE
 See the license.txt file included with this bundle.
+
+CHANGELOG
+7/22/08 - v 0.1 - Initial Release
