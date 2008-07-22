@@ -17,6 +17,7 @@ Please pull the latest version of RubyLoader from SVN, under the "source" tab at
 The following are the steps for installing the RubyLoader CFC.  
 
 1.  Copy contents of the /lib directory into ${ColdFusionRoot}/cfusion/lib directory
+
 2.  Copy contents of the /src directory into your webroot.
 
 === USAGE ===
